@@ -28,11 +28,11 @@ class Appointment(models.Model):
 
 
 class AppointmentMessage(models.Model):
-    chat_id = models.ForeignKey(Appointment,on_delete=models.SET_DEFAULT)
+    chat_id = models.ForeignKey(Appointment,on_delete=models.CASCADE,related_name='appointment_chat')
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    sender_id = models.ForeignKey(User,on_delete=models.SET_DEFAULT)
-    reciever_id = models.ForeignKey(User,on_delete=models.SET_DEFAULT)
+    sender_id = models.ForeignKey(User,on_delete=models.CASCADE, related_name="appointment_sender")
+    reciever_id = models.ForeignKey(User,on_delete=models.CASCADE, related_name="appointment_reciever")
 
 
 
