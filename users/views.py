@@ -1,6 +1,7 @@
 import os
 import random
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -9,7 +10,15 @@ from .serializers import UserSerializer, UnauthorizedUserSerializer
 from twilio.rest import Client
 from dotenv import load_dotenv
 from users.models import Verification, User
+from twilio.rest import Client
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+
+
+from .models import Address, Link, User, Dentist, Verification, Location
+from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer
 
 # Create your views here.
 load_dotenv()
@@ -44,13 +53,13 @@ class SendOTPView(APIView):
             verification.code = otp
             verification.phone_num = recipient_phone_number
             verification.expiration_date = datetime.now() + timedelta(seconds=300)
-
+            
             verification.save()
         else:
             verification = Verification(phone_number=recipient_phone_number)
             verification.code = otp
             verification.expiration_date = datetime.now() + timedelta(seconds=300)
-
+            
             verification.save()
 
         body = f"Your Smile Verification code is {str(otp)}"
@@ -100,3 +109,156 @@ class AuthenticateOTPView(APIView):
 def generateOTP():
 
     return random.randrange(100000, 999999)
+
+
+
+
+## ADD DENTIST DETAIL
+
+### DENTIST LOCATION
+class LocationView(APIView):
+    def post(self, request):
+        serializer = LocationSerializer(request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    
+class LocationDetailView(APIView):
+    def get(self, request, id):
+        location = get_object_or_404(Location, pk= id)
+        serializer = LocationSerializer(location)
+
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = LocationSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, id):
+        location = get_object_or_404(Location, pk= id)
+        location.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+##
+## END OF DENTIST LOCATION
+##
+
+
+##
+## DENTIST ADDRESS
+##
+class AddressView(APIView):
+    def post(self, request):
+        serializer = AddressSerializer(request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
+
+class AddressDetailView(APIView):
+    def get(self, request, id):
+        address = get_object_or_404(Address, pk= id)
+        serializer = AddressSerializer(address)
+
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = AddressSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, id):
+        address = get_object_or_404(Address, pk= id)
+        address.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+##
+## END OF DENTIST ADDRESS
+##
+
+
+##
+## Dentist Link
+##
+
+
+class LinkView(APIView):
+    def post(self, request):
+        serializer = LinkSerializer(request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+class LinkDetailView(APIView):
+    def get(self, request, id):
+        link = get_object_or_404(Link, pk= id)
+        serializer = LinkSerializer(link)
+
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = LinkSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, id):
+        link = get_object_or_404(Link, pk= id)
+        link.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+##
+## END Of Dentist Link
+##
+
+
+
+##
+##  Dentist INFO
+##
+class DentistDetailView(APIView):
+    def get(self, request, id):
+        dentist = get_object_or_404(Dentist, pk= id)
+        serializer = DentistSerializer(dentist)
+
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = DentistSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, id):
+        dentist = get_object_or_404(Dentist, pk= id)
+        dentist.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DentistView(APIView):
+    def post(self, request):
+        serializer = DentistSerializer(request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
