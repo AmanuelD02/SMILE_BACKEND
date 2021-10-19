@@ -5,6 +5,7 @@ from users.models import User, Dentist
 class Follow(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     dentist_id = models.ForeignKey(Dentist, on_delete=models.CASCADE)
+    notification = models.BooleanField(default=True)
     
     
     class Meta:
