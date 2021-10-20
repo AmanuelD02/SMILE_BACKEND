@@ -75,7 +75,7 @@ def generateOTP():
 ### DENTIST LOCATION
 class LocationView(APIView):
     def post(self, request):
-        serializer = LocationSerializer(request.data)
+        serializer = LocationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -90,7 +90,7 @@ class LocationDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = LocationSerializer(request.data)
+        serializer = LocationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -113,7 +113,7 @@ class LocationDetailView(APIView):
 ##
 class AddressView(APIView):
     def post(self, request):
-        serializer = AddressSerializer(request.data)
+        serializer = AddressSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -129,7 +129,7 @@ class AddressDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = AddressSerializer(request.data)
+        serializer = AddressSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -154,7 +154,7 @@ class AddressDetailView(APIView):
 
 class LinkView(APIView):
     def post(self, request):
-        serializer = LinkSerializer(request.data)
+        serializer = LinkSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -168,7 +168,7 @@ class LinkDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = LinkSerializer(request.data)
+        serializer = LinkSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -198,7 +198,7 @@ class DentistDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = DentistSerializer(request.data)
+        serializer = DentistSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -214,7 +214,7 @@ class DentistDetailView(APIView):
 
 class DentistView(APIView):
     def post(self, request):
-        serializer = DentistSerializer(request.data)
+        serializer = DentistSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
