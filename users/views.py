@@ -1,8 +1,15 @@
 import os
 import random
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from .serializers import UserSerializer, UnauthorizedUserSerializer
+from twilio.rest import Client
+from dotenv import load_dotenv
+from users.models import Verification, User
 from twilio.rest import Client
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -27,6 +34,10 @@ class RegisterView(APIView):
 
 
 class SendOTPView(APIView):
+    """
+    User requests for authentication code by sending Phone Number
+    """
+
     def post(self, request):
         account_sid = os.getenv('TWILIO_ACCOUNT_SID')
         auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
@@ -61,6 +72,38 @@ class SendOTPView(APIView):
         if message.sid:
             return Response('ok')
         return Response("Error")
+
+
+class AuthenticateOTPView(APIView):
+    """
+    User sends Authentication code 
+    """
+
+    def post(self, request):
+        data = {}
+        phone_num = request.data['phone_number']
+        code = request.data['code']
+        verification = get_object_or_404(Verification, phone_num=phone_num)
+        if verification:
+            if verification.code == code:
+                try:
+                    
+                    user = User.objects.get(phone_num=phone_num)
+                    token = Token.objects.create(user=user)
+                    serializer = UserSerializer(user)
+                    data["message"] = "User Logged in"
+                    data["phone_number"] = user.phone_num
+                    response = {"data":data, "token":token}
+                    return Response(response)
+                    
+                except User.DoesNotExist:
+                    message = "Please Register to Continue"
+                    unauthorized_user_data = {"phone_number":phone_num, "message":message}
+                    unauthorized_user = UnauthorizedUserSerializer(unauthorized_user_data).data
+                    return Response(unauthorized_user)
+                    
+                
+        
 
 
 def generateOTP():

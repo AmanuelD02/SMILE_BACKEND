@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'debug_toolbar',
+    'rest_framework.authtoken',
     'users',
     'clinic',
     'treatment',
@@ -46,8 +47,8 @@ INSTALLED_APPS = [
     'appointment',
     'follow',
     'payment',
-    'consultation',
-    
+    'consultation'
+
 
 ]
 
@@ -142,7 +143,13 @@ AUTH_USER_MODEL= 'users.User'
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
     'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE':10
+    'PAGE_SIZE':10,
+      'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 } 
 
 
@@ -152,3 +159,5 @@ INTERNAL_IPS = [
     '127.0.0.1',
     # ...
 ]
+AUTH_USER_MODEL = 'users.User'
+
