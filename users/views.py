@@ -1,6 +1,8 @@
 import os
 import random
+import json
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
@@ -14,44 +16,61 @@ from dotenv import load_dotenv
 from users.models import Verification, User
 from twilio.rest import Client
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
-from django.shortcuts import get_object_or_404
+import datetime
 from rest_framework import status
 
 
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer
+from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer
 
 # Create your views here.
 load_dotenv()
+account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
+phone_number = os.getenv('TWILIO_PHONE_NUMBER')
 
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny, ]
     parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request):
-        serializer = UserRegisterSerializer(data=request.data)
+    def post(self, request, format=None):
+        data = request.data.dict()
+        phone_num = data['phone_num']
+        serializer = UserRegisterSerializer(data=data)
+        print(data)
+        print("ser-", serializer)
         if serializer.is_valid():
-            phone_number = serializer.data['phone_num']
-            if Verification.objects.get(phone_num=phone_number).is_verified == True:
+
+            try:
+                verification = Verification.objects.get(
+                    phone_num=phone_num)
+                if verification == None:
+                    raise Verification.DoesNotExist
                 serializer.save()
-            else:
+                user = User.objects.get(phone_num=phone_num)
+                token = Token.objects.create(user=user)
+
+                Verification.objects.filter(phone_num=phone_num).delete()
+                return Response({"data": serializer.data, "token": token}, status=status.HTTP_201_CREATED)
+            except Verification.DoesNotExist:
                 return Response({
                     "message": "Please Verify Your Phone Number First"
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                "message": "Unsupported Data Type"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SendOTPView(APIView):
+    permission_classes = [AllowAny, ]
     """
     User requests for authentication code by sending Phone Number
     """
 
     def post(self, request):
-        account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-        auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
-        phone_number = os.getenv('TWILIO_PHONE_NUMBER')
 
         client = Client(account_sid, auth_token)
         recipient_phone_number = request.data['phone_number']
@@ -59,34 +78,39 @@ class SendOTPView(APIView):
         otp = generateOTP()
 
         try:
-            verification = Verification.objects.get(phone_num=phone_number)
+            verification = Verification.objects.get(
+                phone_num=recipient_phone_number)
             verification.code = otp
-            verification.expiration_date = datetime.now() + timedelta(seconds=300)
-            verification.save()
+            verification.expiration_date = timezone.now() + \
+                datetime.timedelta(seconds=300)
+            verification.save(update_fields=['code', 'expiration_date'])
 
-        except:
+        except Verification.DoesNotExist:
             verification = Verification.objects.create(
                 code=otp,
                 phone_num=recipient_phone_number,
-                expiration_date=datetime.now() + timedelta(seconds=300),
-                is_verified=False
+                expiration_date=timezone.now() + datetime.timedelta(seconds=300),
+                is_verified=False,
+
             )
 
             verification.save()
 
-        body = f"Your Smile Verification code is {str(otp)}"
-        message = client.messages.create(
-            from_=phone_number,
-            body=body,
-            to=recipient_phone_number
-        )
+        # body = f"Your Smile Verification code is {str(otp)}"
+        # message = client.messages.create(
+        #     from_=phone_number,
+        #     body=body,
+        #     to=recipient_phone_number
+        # )
 
-        if message.sid:
-            return Response('ok')
+        # if message.sid:
+        if otp:
+            return Response({"message": "Verification Code Sent"}, status=status.HTTP_201_CREATED)
         return Response("Error")
 
 
 class AuthenticateOTPView(APIView):
+    permission_classes = [AllowAny, ]
     """
     User sends Authentication code 
     """
@@ -96,31 +120,34 @@ class AuthenticateOTPView(APIView):
         phone_num = request.data['phone_number']
         code = request.data['code']
         verification = get_object_or_404(Verification, phone_num=phone_num)
-
-        if (datetime.now() <= expiration_interval):
+        expiration_interval = datetime.timedelta(seconds=300)
+        if (verification.expiration_date - timezone.now() < expiration_interval):
             if verification.code == code:
                 try:
 
-                    user = User.objects.get(phone_num=phone_num)
+                    user = User.objects.filter(phone_num=phone_num).first()
+                    if user == None:
+                        raise AttributeError
                     token = Token.objects.create(user=user)
                     serializer = UserSerializer(user)
                     data["message"] = "User Logged in"
                     data["phone_number"] = user.phone_num
                     response = {"data": data, "token": token}
+                    Verification.objects.filter(phone_num=phone_num).delete()
 
                     return Response(response)
 
-                except User.DoesNotExist:
+                except:
                     message = "Please Register to Continue"
                     unauthorized_user_data = {
-                        "phone_number": phone_num, "message": message}
+                        "phone_num": phone_num, "message": message}
                     unauthorized_user = UnauthorizedUserSerializer(
                         unauthorized_user_data).data
-                    return Response(unauthorized_user)
 
-                finally:
-                    # Delete the code from verification Table
-                    Verification.objects.delete(phone_num=phone_num)
+                    ##is_verified = true
+                    Verification.objects.filter(
+                        phone_num=phone_num).update(is_verified=True)
+                    return Response(unauthorized_user)
 
         else:
             return Response({
