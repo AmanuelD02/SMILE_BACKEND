@@ -37,6 +37,8 @@ class RegisterView(APIView):
     def post(self, request, format=None):
         data = request.data.dict()
         phone_num = data['phone_num']
+        if User.objects.get(phone_num=phone_num):
+            return Response({"message": "Phone Number already used, please use a different one."}, status=status.HTTP_409_CONFLICT)
         serializer = UserRegisterSerializer(data=data)
         print(data)
         print("ser-", serializer)
@@ -48,7 +50,7 @@ class RegisterView(APIView):
                 if verification == None:
                     raise Verification.DoesNotExist
                 serializer.save()
-                user = User.objects.get(phone_num=phone_num) ######
+                user = User.objects.get(phone_num=phone_num)
                 token = Token.objects.create(user=user)
 
                 Verification.objects.filter(phone_num=phone_num).delete()
@@ -182,7 +184,7 @@ class LocationDetailView(APIView):
     def put(self, request):
         location = get_object_or_404(Location, pk=request.data['id'])
 
-        serializer = LocationSerializer(location,data=request.data)
+        serializer = LocationSerializer(location, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -217,14 +219,13 @@ class AddressDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request,id):
+    def put(self, request, id):
         address = get_object_or_404(Address, pk=request.data['id'])
 
         serializer = AddressSerializer(address, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-        
 
     def delete(self, request, id):
         print("DELETE")
@@ -259,14 +260,13 @@ class LinkDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request,id):
+    def put(self, request, id):
         link = get_object_or_404(Link, pk=request.data['id'])
 
-        serializer = LinkSerializer(link,data=request.data)
+        serializer = LinkSerializer(link, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-        
 
     def delete(self, request, id):
         link = get_object_or_404(Link, pk=id)
@@ -292,7 +292,7 @@ class DentistDetailView(APIView):
     def put(self, request):
         dentist = get_object_or_404(Dentist, pk=request.data['id'])
 
-        serializer = DentistSerializer(dentist,data=request.data)
+        serializer = DentistSerializer(dentist, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -311,5 +311,3 @@ class DentistView(APIView):
         serializer.save()
 
         return Response(serializer.data)
-
-
