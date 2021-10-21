@@ -3,6 +3,10 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 
+def upload_to(instance, filename):
+    return 'media/{filename}'.format(filename=filename)
+
+
 class User(AbstractUser):
     DENTIST_ROLE = 'D'
     PATIENT_ROLE = 'P'
@@ -10,13 +14,13 @@ class User(AbstractUser):
 
     full_name = models.CharField(max_length=255)
     phone_num = models.CharField(max_length=15, unique=True)
-    # password = models.CharField(max_length=255)
     role = models.CharField(
         max_length=1, choices=USER_ROLE_CHOICES, default=DENTIST_ROLE)
 
     date_of_birth = models.DateField(null=True)
     bio = models.TextField(null=True)
-    profile_pic_path = models.ImageField(null=True)
+    profile_pic = models.ImageField(
+        upload_to=upload_to, default='media\default.png')
     slug = models.SlugField(null=True)
     username = None
     password = None
