@@ -15,4 +15,4 @@ class TreatmentNameSerializer(serializers.ModelSerializer):
 class TreatmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Treatment
-        fields = ['dentist_id', 'name','description', 'price', 'duration', 'photo']
+        fields = ['id','dentist_id', 'name','description', 'price', 'duration', 'photo']

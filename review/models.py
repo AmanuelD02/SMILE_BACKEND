@@ -9,6 +9,8 @@ class Review(models.Model):
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
     content = models.TextField()
     rating = models.IntegerField(default=1, validators=[MaxValueValidator(5), MinValueValidator(1)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at= models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [

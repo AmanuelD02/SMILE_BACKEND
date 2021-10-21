@@ -10,7 +10,8 @@ class TreatmentName(models.Model):
 
 
 class Treatment(models.Model):
-    dentist_id = models.ForeignKey(Dentist,on_delete=models.CASCADE)
+    id = models.IntegerField(primary_key=True)
+    dentist_id = models.ForeignKey(Dentist,on_delete=models.CASCADE,unique=False)
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=1000, decimal_places=2)

@@ -86,11 +86,11 @@ class TreatmentDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request, treatment_id):
-        treament = get_object_or_404(Treatment, pk= treatment_id)
-        serializer = TreatmentSerializer(data = request.data)
+        treatment = get_object_or_404(Treatment, pk= treatment_id)
+        serializer = TreatmentSerializer(treatment,data = request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.update()
+        serializer.save()
 
         return Response(serializer.data)
 

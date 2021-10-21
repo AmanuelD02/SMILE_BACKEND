@@ -44,7 +44,7 @@ class Dentist(models.Model):
     experience_year = models.PositiveIntegerField()
     document_path = models.CharField(max_length=255)
     verified = models.BooleanField(default=False)
-    rating = models.PositiveSmallIntegerField()
+    rating = models.PositiveSmallIntegerField(blank=True)
     consultation_availabilty = models.BooleanField(default=False)
 
 

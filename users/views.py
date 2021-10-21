@@ -23,13 +23,13 @@ from rest_framework import status
 from .models import Address, Link, User, Dentist, Verification, Location
 from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer
 
-# Create your views here.
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
 auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
 phone_number = os.getenv('TWILIO_PHONE_NUMBER')
 
 
+# Create your views here.
 class RegisterView(APIView):
     permission_classes = [AllowAny, ]
     parser_classes = (MultiPartParser, FormParser)
@@ -48,7 +48,7 @@ class RegisterView(APIView):
                 if verification == None:
                     raise Verification.DoesNotExist
                 serializer.save()
-                user = User.objects.get(phone_num=phone_num)
+                user = User.objects.get(phone_num=phone_num) ######
                 token = Token.objects.create(user=user)
 
                 Verification.objects.filter(phone_num=phone_num).delete()
@@ -105,7 +105,7 @@ class SendOTPView(APIView):
 
         # if message.sid:
         if otp:
-            return Response({"message": "Verification Code Sent"}, status=status.HTTP_201_CREATED)
+            return Response({"message": f"Verification Code Sent f{otp}"}, status=status.HTTP_201_CREATED)
         return Response("Error")
 
 
@@ -217,7 +217,7 @@ class AddressDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request):
+    def put(self, request,id):
         address = get_object_or_404(Address, pk=request.data['id'])
 
         serializer = AddressSerializer(address, data=request.data)
@@ -227,6 +227,7 @@ class AddressDetailView(APIView):
         
 
     def delete(self, request, id):
+        print("DELETE")
         address = get_object_or_404(Address, pk=id)
         address.delete()
 
@@ -258,7 +259,7 @@ class LinkDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request):
+    def put(self, request,id):
         link = get_object_or_404(Link, pk=request.data['id'])
 
         serializer = LinkSerializer(link,data=request.data)
@@ -310,3 +311,5 @@ class DentistView(APIView):
         serializer.save()
 
         return Response(serializer.data)
+
+
