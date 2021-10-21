@@ -1,10 +1,11 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 
 def upload_to(instance, filename):
-    return 'media/{filename}'.format(filename=filename)
+    return 'media/{datetime}{filename}'.format(datetime= datetime.now(),filename=filename)
 
 
 class User(AbstractUser):
