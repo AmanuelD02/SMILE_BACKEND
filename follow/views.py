@@ -23,7 +23,11 @@ class FollowView(APIView):
     
 
     def put(self, request):
-        serializer = FollowSerializer(data= request.data)
+        follower = Follow.objects.filter(dentist_id=request.data['dentist_id'], user_id=request.data['user_id']).first()
+        if follower ==None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = FollowSerializer(follower,data= request.data)
         serializer.is_valid(raise_exception=True)
 
         serializer.save()

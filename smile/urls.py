@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/v1/follow/', include('follow.urls')),
     path('api/v1/review/',include('review.urls')),
     path('api/v1/clinic/', include('clinic.urls')),
+    path('api/v1/treatment/', include('treatment.urls')),
 ]

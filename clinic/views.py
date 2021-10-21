@@ -22,16 +22,18 @@ class ClinicDetailView(APIView):
     
     def put(self, request, clinic_id):
         clinic = get_object_or_404(Clinic, pk= clinic_id)
-        serializer = ClinicSerializer(clinic)
-        serializer.update()
+        serializer = ClinicSerializer(clinic, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(serializer.data)
 
     def delete(self, request, clinic_id):
+        print("DELTEING")
         clinic = get_object_or_404(Clinic, pk= clinic_id)
-        serializer = ClinicSerializer(clinic)
-        serializer.delete()
-
+        
+        clinic.delete()
+        # clinic.save()
         return Response(status= status.HTTP_204_NO_CONTENT)    
         
 class ClinicView(APIView):
@@ -41,7 +43,7 @@ class ClinicView(APIView):
 
         serializer.save()
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ClinicSearchView(ListAPIView):

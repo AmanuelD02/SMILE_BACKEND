@@ -1,7 +1,6 @@
 import os
 import random
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -133,11 +132,12 @@ class LocationDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = LocationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        location = get_object_or_404(Location, pk=request.data['id'])
+
+        serializer = LocationSerializer(location,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
     def delete(self, request, id):
@@ -172,11 +172,13 @@ class AddressDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = AddressSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        address = get_object_or_404(Address, pk=request.data['id'])
+
+        serializer = AddressSerializer(address, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+        
 
 
     def delete(self, request, id):
@@ -211,11 +213,13 @@ class LinkDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = LinkSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        link = get_object_or_404(Link, pk=request.data['id'])
+
+        serializer = LinkSerializer(link,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+        
 
 
     def delete(self, request, id):
@@ -241,11 +245,12 @@ class DentistDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = DentistSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        dentist = get_object_or_404(Dentist, pk=request.data['id'])
+
+        serializer = DentistSerializer(dentist,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
     def delete(self, request, id):
