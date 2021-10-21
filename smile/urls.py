@@ -18,12 +18,17 @@ import debug_toolbar
 from django.contrib import admin
 from django.urls import path, include
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
     path('admin/', admin.site.urls),
-    path('api/v1/user/',include('users.urls')),
+    path('api/v1/user/', include('users.urls')),
     path('api/v1/follow/', include('follow.urls')),
-    path('api/v1/review/',include('review.urls')),
+    path('api/v1/review/', include('review.urls')),
     path('api/v1/clinic/', include('clinic.urls')),
     path('api/v1/treatment/', include('treatment.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

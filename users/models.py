@@ -2,24 +2,28 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
+
+def upload_to(instance, filename):
+    return 'media/{filename}'.format(filename=filename)
+
+
 class User(AbstractUser):
     DENTIST_ROLE = 'D'
     PATIENT_ROLE = 'P'
     USER_ROLE_CHOICES = [(DENTIST_ROLE, 'Dentist'), (PATIENT_ROLE, 'Patient')]
 
-
     full_name = models.CharField(max_length=255)
     phone_num = models.CharField(max_length=15, unique=True)
-    # password = models.CharField(max_length=255)
-    role = models.CharField(max_length=1, choices=USER_ROLE_CHOICES, default=DENTIST_ROLE)
+    role = models.CharField(
+        max_length=1, choices=USER_ROLE_CHOICES, default=DENTIST_ROLE)
 
     date_of_birth = models.DateField(null=True)
     bio = models.TextField(null=True)
-    profile_pic_path = models.CharField(max_length=255)
+    profile_pic = models.ImageField(
+        upload_to=upload_to, default='media\default.png')
     slug = models.SlugField(null=True)
     username = None
     password = None
-    
 
     USERNAME_FIELD = 'phone_num'
 
@@ -28,11 +32,7 @@ class Verification(models.Model):
     phone_num = models.CharField(max_length=15, unique=True, primary_key=True)
     code = models.IntegerField(null=False)
     expiration_date = models.DateTimeField()
-
-
-
-
-
+    is_verified = models.BooleanField(default=False)
 
 
 class Dentist(models.Model):
@@ -49,13 +49,15 @@ class Dentist(models.Model):
 
 
 class Location(models.Model):
-    id = models.OneToOneField(Dentist, on_delete=models.CASCADE, primary_key=True)
+    id = models.OneToOneField(
+        Dentist, on_delete=models.CASCADE, primary_key=True)
     latitude = models.CharField(max_length=255)
     longtiude = models.CharField(max_length=255)
 
 
 class Address(models.Model):
-    id = models.OneToOneField(Dentist, on_delete=models.CASCADE, primary_key=True)
+    id = models.OneToOneField(
+        Dentist, on_delete=models.CASCADE, primary_key=True)
     country = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=255, blank=True)
     state = models.CharField(max_length=255, blank=True)
@@ -63,11 +65,10 @@ class Address(models.Model):
 
 
 class Link(models.Model):
-    id = models.OneToOneField(Dentist, on_delete=models.CASCADE, primary_key=True)
+    id = models.OneToOneField(
+        Dentist, on_delete=models.CASCADE, primary_key=True)
     facebook = models.CharField(max_length=255, blank=True)
     twitter = models.CharField(max_length=255, blank=True)
     linkedin = models.CharField(max_length=255, blank=True)
     whatsapp = models.CharField(max_length=255, blank=True)
     telegram = models.CharField(max_length=255, blank=True)
-
-

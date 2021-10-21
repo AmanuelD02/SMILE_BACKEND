@@ -15,6 +15,12 @@ class UnauthorizedUserSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=255)
 
 
+class UserRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('phone_num', 'full_name', 'profile_pic', 'role')
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -26,24 +32,19 @@ class UserSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['id','latitude','longtiude']
-
+        fields = ['id', 'latitude', 'longtiude']
 
 
 class AddressSerializer(serializers.ModelSerializer):
-     class Meta:
+    class Meta:
         model = Address
-        fields = ['id','country','city','state', 'street']
-
-
+        fields = ['id', 'country', 'city', 'state', 'street']
 
 
 class LinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Link
         fields = '__all__'
-
-
 
 
 class DentistSerializer(serializers.ModelSerializer):
