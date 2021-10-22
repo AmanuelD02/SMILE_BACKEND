@@ -27,7 +27,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'full_name', 'phone_num']
 
 
-#serializer = UnauthorizedUserSerializer()
+class UserEditSerializer(serializers.Serializer):
+    full_name = models.CharField(max_length=255)
+    date_of_birth = models.DateField()
+    bio = models.TextField()
+    profile_pic = models.ImageField()
+
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
