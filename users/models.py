@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 def upload_to(instance, filename):
-    return 'media/{datetime}{filename}'.format(datetime= datetime.now(),filename=filename)
+    return '{datetime}{filename}'.format(datetime=datetime.now(), filename=filename)
 
 
 class User(AbstractUser):

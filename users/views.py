@@ -3,14 +3,13 @@ import random
 import json
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import UserSerializer, UnauthorizedUserSerializer
+from .utils import Utils
 from twilio.rest import Client
 from dotenv import load_dotenv
 from users.models import Verification, User
@@ -37,11 +36,11 @@ class RegisterView(APIView):
     def post(self, request, format=None):
         data = request.data.dict()
         phone_num = data['phone_num']
-        if User.objects.get(phone_num=phone_num):
-            return Response({"message": "Phone Number already used, please use a different one."}, status=status.HTTP_409_CONFLICT)
+        if User.objects.filter(phone_num=phone_num).first():
+            return Response({"message": "Phone Number already used, please use a different one."},
+                            status=status.HTTP_409_CONFLICT)
         serializer = UserRegisterSerializer(data=data)
-        print(data)
-        print("ser-", serializer)
+
         if serializer.is_valid():
 
             try:
@@ -51,7 +50,7 @@ class RegisterView(APIView):
                     raise Verification.DoesNotExist
                 serializer.save()
                 user = User.objects.get(phone_num=phone_num)
-                token = Token.objects.create(user=user)
+                token = Utils.encode_token(user)
 
                 Verification.objects.filter(phone_num=phone_num).delete()
                 return Response({"data": serializer.data, "token": token}, status=status.HTTP_201_CREATED)
@@ -107,7 +106,7 @@ class SendOTPView(APIView):
 
         # if message.sid:
         if otp:
-            return Response({"message": f"Verification Code Sent f{otp}"}, status=status.HTTP_201_CREATED)
+            return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
         return Response("Error")
 
 
@@ -119,21 +118,23 @@ class AuthenticateOTPView(APIView):
 
     def post(self, request):
         data = {}
-        phone_num = request.data['phone_number']
+        phone_num = request.data['phone_num']
         code = request.data['code']
         verification = get_object_or_404(Verification, phone_num=phone_num)
         expiration_interval = datetime.timedelta(seconds=300)
         if (verification.expiration_date - timezone.now() < expiration_interval):
+
             if verification.code == code:
                 try:
 
-                    user = User.objects.filter(phone_num=phone_num).first()
+                    user = User.objects.get(phone_num=phone_num)
                     if user == None:
                         raise AttributeError
-                    token = Token.objects.create(user=user)
+                    token = Utils.encode_token(user)
+                    print(token)
                     serializer = UserSerializer(user)
                     data["message"] = "User Logged in"
-                    data["phone_number"] = user.phone_num
+                    data["phone_num"] = user.phone_num
                     response = {"data": data, "token": token}
                     Verification.objects.filter(phone_num=phone_num).delete()
 
