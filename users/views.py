@@ -6,9 +6,8 @@ from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser
-from .serializers import UserSerializer, UnauthorizedUserSerializer
 from .utils import Utils
 from twilio.rest import Client
 from dotenv import load_dotenv
@@ -20,18 +19,23 @@ from rest_framework import status , generics
 
 
 from rest_framework_swagger import renderers
+import jwt
+from rest_framework import status
 
 
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer
+from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
 auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
 phone_number = os.getenv('TWILIO_PHONE_NUMBER')
-
+EXPIRATION_INTERVAL = int(os.getenv('VERIFICATION_EXPIRATION_INTERVAL'))
+SECRET_KEY = os.getenv('JWT_SECRET')
 
 # Create your views here.
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny, ]
     parser_classes = (MultiPartParser, FormParser)
@@ -124,12 +128,11 @@ class AuthenticateOTPView(APIView):
         phone_num = request.data['phone_num']
         code = request.data['code']
         verification = get_object_or_404(Verification, phone_num=phone_num)
-        expiration_interval = datetime.timedelta(seconds=300)
+        expiration_interval = datetime.timedelta(seconds=EXPIRATION_INTERVAL)
         if (verification.expiration_date - timezone.now() < expiration_interval):
 
             if verification.code == code:
                 try:
-
                     user = User.objects.get(phone_num=phone_num)
                     if user == None:
                         raise AttributeError
@@ -164,6 +167,42 @@ class AuthenticateOTPView(APIView):
 def generateOTP():
 
     return random.randrange(100000, 999999)
+
+
+class EditProfileView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def put(self, request):
+        # Check and validate TOken from user
+        token = request.headers["Authorization"]
+        user_id = ""
+        request_data = request.data.dict()
+        try:
+            decoded_token = Utils.decode_token(token, "SNAKE_POO")
+            print(decoded_token)
+            user_id = decoded_token['id']
+            print(user_id)
+            #serializer = UserEditSerializer(data=request.data.dict())
+
+        except jwt.ExpiredSignatureError:
+            return Response({"message": "Authentication Failed"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = User.objects.filter(id=user_id).first()
+        if user != None:
+            # if serializer.is_valid():
+            user.full_name = request_data["full_name"]
+            user.date_of_birth = request_data["date_of_birth"]
+            user.bio = request_data["bio"]
+            user.profile_pic = request_data["profile_pic"]
+            user.save(update_fields=['full_name',
+                      "date_of_birth", 'bio', 'profile_pic'])
+
+            return Response({"Message": "Successfully Updated"})
+            # else:
+            #     return Response({"message": "Invalid Input"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "Invalid Phone Number"}, status=status.HTTP_404_NOT_FOUND)
 
 
 # ADD DENTIST DETAIL

@@ -16,8 +16,13 @@ class Utils:
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=2),
             'iat': datetime.datetime.utcnow()
         }
-        token = jwt.encode(payload, "SECRET_KEY", algorithm='HS256')
+        token = jwt.encode(payload, "SNAKE_POO", algorithm='HS256')
         return token
+
+    @staticmethod
+    def decode_token(encoded_jwt, secret):
+        decoded_value = jwt.decode(encoded_jwt, secret, algorithms=["HS256"])
+        return decoded_value
 
 
 def update_user_account(full_name, phone_num, role, date_of_birth, bio, profile_pic_path, slug, username=None):
