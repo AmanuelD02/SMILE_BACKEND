@@ -28,10 +28,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserEditSerializer(serializers.Serializer):
-    full_name = models.CharField(max_length=255)
-    date_of_birth = models.DateField()
-    bio = models.TextField()
-    profile_pic = models.ImageField()
+    full_name = serializers.CharField(max_length=255)
+    date_of_birth = serializers.DateField()
+    bio = serializers.CharField(allow_blank=True)
+    profile_pic = serializers.ImageField()
 
 
 class LocationSerializer(serializers.ModelSerializer):
