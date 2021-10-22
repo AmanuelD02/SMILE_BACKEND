@@ -1,5 +1,5 @@
 from django.db import models
-import treatment
+
 from users.models import User, Dentist 
 from treatment.models import Treatment
 # Create your models here.

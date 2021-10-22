@@ -15,6 +15,10 @@ from users.models import Verification, User
 from twilio.rest import Client
 from dotenv import load_dotenv
 import datetime
+from rest_framework import status , generics
+
+
+from rest_framework_swagger import renderers
 import jwt
 from rest_framework import status
 
@@ -205,6 +209,11 @@ class EditProfileView(APIView):
 
 # DENTIST LOCATION
 class LocationView(APIView):
+    renderer_classes = [
+        renderers.OpenAPIRenderer,
+        renderers.SwaggerUIRenderer
+    ]
+
     def post(self, request):
         serializer = LocationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -214,6 +223,7 @@ class LocationView(APIView):
 
 
 class LocationDetailView(APIView):
+
     def get(self, request, id):
         location = get_object_or_404(Location, pk=id)
         serializer = LocationSerializer(location)
