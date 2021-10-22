@@ -8,6 +8,8 @@ def upload_to(instance, filename):
     return '{datetime}{filename}'.format(datetime=datetime.now(), filename=filename)
 
 
+def upload_to_document(instance, filename):
+    return 'document\{datetime}{filename}'.format(datetime=datetime.now(), filename= filename)
 class User(AbstractUser):
     DENTIST_ROLE = 'D'
     PATIENT_ROLE = 'P'
@@ -43,7 +45,7 @@ class Dentist(models.Model):
     appointment_rate = models.FloatField()
     consultation_rate = models.FloatField()
     experience_year = models.PositiveIntegerField()
-    document_path = models.CharField(max_length=255)
+    document_path = models.FileField(blank=True, upload_to=upload_to_document)
     verified = models.BooleanField(default=False)
     rating = models.PositiveSmallIntegerField(blank=True)
     consultation_availabilty = models.BooleanField(default=False)

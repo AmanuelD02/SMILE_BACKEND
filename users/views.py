@@ -57,10 +57,11 @@ class RegisterView(APIView):
                     raise Verification.DoesNotExist
                 serializer.save()
                 user = User.objects.get(phone_num=phone_num)
+                user_serializer = UserSerializer(user)
                 token = Utils.encode_token(user)
 
                 Verification.objects.filter(phone_num=phone_num).delete()
-                return Response({"data": serializer.data, "token": token}, status=status.HTTP_201_CREATED)
+                return Response({"data": user_serializer.data, "token": token}, status=status.HTTP_201_CREATED)
             except Verification.DoesNotExist:
                 return Response({
                     "message": "Please Verify Your Phone Number First"
@@ -104,15 +105,15 @@ class SendOTPView(APIView):
 
             verification.save()
 
-        # body = f"Your Smile Verification code is {str(otp)}"
-        # message = client.messages.create(
-        #     from_=phone_number,
-        #     body=body,
-        #     to=recipient_phone_number
-        # )
+        body = f"Your Smile Verification code is {str(otp)}"
+        message = client.messages.create(
+            from_=phone_number,
+            body=body,
+            to=recipient_phone_number
+        )
 
-        # if message.sid:
-        if otp:
+        if message.sid:
+        # if otp:
             return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
         return Response("Error")
 
@@ -141,7 +142,8 @@ class AuthenticateOTPView(APIView):
                     serializer = UserSerializer(user)
                     data["message"] = "User Logged in"
                     data["phone_num"] = user.phone_num
-                    response = {"data": data, "token": token}
+                    user_serializer = UserSerializer(user)
+                    response = {"data": user_serializer.data, "token": token}
                     Verification.objects.filter(phone_num=phone_num).delete()
 
                     return Response(response)
@@ -209,10 +211,6 @@ class EditProfileView(APIView):
 
 # DENTIST LOCATION
 class LocationView(APIView):
-    renderer_classes = [
-        renderers.OpenAPIRenderer,
-        renderers.SwaggerUIRenderer
-    ]
 
     def post(self, request):
         serializer = LocationSerializer(data=request.data)
@@ -332,13 +330,14 @@ class LinkDetailView(APIView):
 # Dentist INFO
 ##
 class DentistDetailView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
     def get(self, request, id):
         dentist = get_object_or_404(Dentist, pk=id)
         serializer = DentistSerializer(dentist)
 
         return Response(serializer.data)
 
-    def put(self, request):
+    def put(self, request,id):
         dentist = get_object_or_404(Dentist, pk=request.data['id'])
 
         serializer = DentistSerializer(dentist, data=request.data)
@@ -354,8 +353,10 @@ class DentistDetailView(APIView):
 
 
 class DentistView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
     def post(self, request):
-        serializer = DentistSerializer(data=request.data)
+        
+        serializer = DentistSerializer(data=request.data.dict())
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

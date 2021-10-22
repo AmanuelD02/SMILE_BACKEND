@@ -6,4 +6,5 @@ urlpatterns = [
     path('<int:review_id>/like', ReviewLikeView.as_view()),
     path('<int:review_id>', ReviewDetailView.as_view()),
     path('likes/list',ReviewLikeListView.as_view()),
+    path('list',ReviewLikeListView.as_view()),
 ]

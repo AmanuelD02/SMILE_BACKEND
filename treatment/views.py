@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import serializers, status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
-
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -61,8 +61,9 @@ class TreatmentNameDetailView(APIView):
 
 
 class TreatmentView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
     def post(self, request):
-        serializer = TreatmentSerializer(data = request.data)
+        serializer = TreatmentSerializer(data = request.data.dict())
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -79,15 +80,16 @@ class TreatmentListView(ListAPIView):
         return queryset
 
 class TreatmentDetailView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
     def get(self, request, treatment_id):
         treament = get_object_or_404(Treatment, pk= treatment_id)
         serializer = TreatmentSerializer(treament)
         
         return Response(serializer.data)
-
+     
     def put(self, request, treatment_id):
         treatment = get_object_or_404(Treatment, pk= treatment_id)
-        serializer = TreatmentSerializer(treatment,data = request.data)
+        serializer = TreatmentSerializer(treatment,data = request.data.dict())
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
