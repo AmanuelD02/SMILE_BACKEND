@@ -7,7 +7,8 @@ from .models import Review, ReviewLike
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['dentist_id', 'user_id', 'content', 'rating']
+        fields = ['id','dentist_id', 'user_id', 'content', 'rating']
+        read_only_fields= ['id']
 
 
 class ReviewLikeSerializer(serializers.ModelSerializer):

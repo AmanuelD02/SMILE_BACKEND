@@ -13,10 +13,14 @@ from .serializers import ReviewLikeSerializer, ReviewSerializer
 class ReviewView(APIView):
     def post(self, request):
         serializer = ReviewSerializer(data= request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST) 
 
-        return Response(serializer.data)
+
 
     
 

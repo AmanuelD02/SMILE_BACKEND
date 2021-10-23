@@ -16,3 +16,4 @@ class TreatmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Treatment
         fields = ['id','dentist_id', 'name','description', 'price', 'duration', 'photo']
+        read_only_fields = ['id']
