@@ -50,14 +50,15 @@ class  AvailabiltyListView(ListAPIView):
 class PendingAppointmentView(APIView):
     def post(self,request):
         serializer = PendingAppointmentSerializer(data = request.data)
+        print(serializer)
         serializer.is_valid(raise_exception=True)
 
-        available = Availability.objects.filter(avaialble_at= serializer.data['avaialble_at']).first()
+        available = Availability.objects.filter(available_at= serializer.data['available_at']).first()
         if available:
             serializer.save()
             return Response(serializer.data)
         
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"Invalid Availability"},status=status.HTTP_400_BAD_REQUEST)
 
 class PendingAppointmentDetailView(APIView):
     def get(self, request, pending_id):
