@@ -15,7 +15,7 @@ from users.models import Verification, User
 from twilio.rest import Client
 from dotenv import load_dotenv
 import datetime
-from rest_framework import status , generics
+from rest_framework import status, generics
 
 
 from rest_framework_swagger import renderers
@@ -97,7 +97,7 @@ class SendOTPView(APIView):
             verification = Verification.objects.create(
                 code=otp,
                 phone_num=recipient_phone_number,
-                expiration_date=timezone.now() + datetime.timedelta(seconds=300),
+                expiration_date=timezone.now() + datetime.timedelta(seconds=EXPIRATION_INTERVAL),
                 is_verified=False,
 
             )
