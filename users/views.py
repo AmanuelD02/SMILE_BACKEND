@@ -16,22 +16,19 @@ from twilio.rest import Client
 from dotenv import load_dotenv
 import datetime
 from rest_framework import status, generics
-
-
 from rest_framework_swagger import renderers
 import jwt
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
 from .models import Address, Link, User, Dentist, Verification, Location
 from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
 
 load_dotenv()
-account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
-phone_number = os.getenv('TWILIO_PHONE_NUMBER')
-EXPIRATION_INTERVAL = int(os.getenv('VERIFICATION_EXPIRATION_INTERVAL'))
-SECRET_KEY = os.getenv('JWT_SECRET')
+account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+auth_token = os.environ.get('TWILIO_ACCOUNT_TOKEN')
+phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
+EXPIRATION_INTERVAL = int(os.environ.get('VERIFICATION_EXPIRATION_INTERVAL'))
+SECRET_KEY = os.environ.get('JWT_SECRET')
 
 # Create your views here.
 
