@@ -19,7 +19,8 @@ class User(AbstractUser):
 
     full_name = models.CharField(max_length=255)
     phone_num = models.CharField(max_length=15, unique=True)
-    role = models.CharField(choices=USER_ROLE_CHOICES, default=PATIENT_ROLE)
+    role = models.CharField(
+        max_length=100, choices=USER_ROLE_CHOICES, default=PATIENT_ROLE)
 
     date_of_birth = models.DateField(null=True)
     bio = models.TextField(null=True)

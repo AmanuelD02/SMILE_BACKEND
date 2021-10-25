@@ -35,7 +35,8 @@ class AppointmentChat(models.Model):
     dentist_id = models.ForeignKey(Dentist, on_delete=models.CASCADE)
     appointment_id = models.ForeignKey(Appointment, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(choices=STATUS, default=PRE_APPOINTMENT)
+    status = models.CharField(
+        max_length=100, choices=STATUS, default=PRE_APPOINTMENT)
     expiration_date = models.DateTimeField()
 
 

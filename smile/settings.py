@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'corsheaders',
     'rest_framework',
     'rest_framework_swagger',
@@ -86,7 +87,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'smile.wsgi.application'
-
+ASGI_APPLICATION = 'smile.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
