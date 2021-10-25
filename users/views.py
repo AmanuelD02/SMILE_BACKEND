@@ -82,8 +82,10 @@ class SendOTPView(APIView):
     def post(self, request):
 
         client = Client(account_sid, auth_token)
-        recipient_phone_number = request.data['phone_number']
-
+        try:
+            recipient_phone_number = request.data['phone_number']
+        except:
+            return Response({"message": "Please Provide Phone Number"}, status=status.HTTP_400_BAD_REQUEST)
         otp = generateOTP()
 
         try:
