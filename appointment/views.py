@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 
 from rest_framework.response import Response
-from rest_framework import  status
+from rest_framework import  serializers, status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -19,6 +19,8 @@ class AvailabilityView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(serializer.data)
+
 
 
 class AvailabilityDetailView(APIView):
@@ -27,6 +29,7 @@ class AvailabilityDetailView(APIView):
         serializer = AvailabiltySerializer(available)
         
         return Response(serializer.data)
+
 
     def delete(self, request, availabilty_id):
         available = get_object_or_404(Availability, pk=availabilty_id)
@@ -50,14 +53,15 @@ class  AvailabiltyListView(ListAPIView):
 class PendingAppointmentView(APIView):
     def post(self,request):
         serializer = PendingAppointmentSerializer(data = request.data)
+        print(serializer)
         serializer.is_valid(raise_exception=True)
 
-        available = Availability.objects.filter(avaialble_at= serializer.data['avaialble_at']).first()
+        available = Availability.objects.filter(available_at= serializer.validated_data['available_at']).first()
         if available:
             serializer.save()
             return Response(serializer.data)
         
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"Invalid Availability"},status=status.HTTP_400_BAD_REQUEST)
 
 class PendingAppointmentDetailView(APIView):
     def get(self, request, pending_id):
@@ -76,28 +80,37 @@ class PendingAppointmentDetailView(APIView):
 
 
 class  PendingAppointmentListView(ListAPIView):
-    serializer_class = PendingAppointment
+    serializer_class = PendingAppointmentSerializer
     pagination_class = PageNumberPagination
     def get_queryset(self):
         dentist_id = self.request.query_params.get('dentist_id',None)
-        queryset = PendingAppointment.objects.filter(dentist_id=dentist_id)
+        queryset = PendingAppointment.objects.filter(dentist_id=dentist_id).order_by('available_at')
         return queryset
 
 class AppointmentView(APIView):
-    def post(self,request):
-        serializer = AppointmentSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        available = Availability.objects.filter(avaialble_at= serializer.data['avaialble_at']).first()
+    def post(self,request,pending_id):
+        pending = get_object_or_404(PendingAppointment, pk= pending_id)
+
+        available = Availability.objects.filter(available_at = pending.available_at).first()
         if available:
             with transaction.atomic():
+                appointment = Appointment()
+                appointment.available_at = pending.available_at
+                appointment.dentist_id = pending.dentist_id
+                appointment.user_id = pending.user_id
+                appointment.treatment_id = pending.treatment_id
+
                 available.delete()
-                pending = PendingAppointment.objects.filter(dentist_id = serializer.data['dentsit_id'], avaialble_at= serializer.data['avaialble_at']).first()
                 pending.delete()
-                serializer.save()
-            return Response(serializer.data)
+                appointment.save()
+                serializer = AppointmentSerializer(appointment)
+
+                return Response(serializer.data)
+            return Response({"message":"some error occured"}, status= status.HTTP_400_BAD_REQUEST)
+                  
         
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+        else:
+            return Response({"message":"not available"},status=status.HTTP_400_BAD_REQUEST)
 
 
 class AppointmentListView(ListAPIView):
