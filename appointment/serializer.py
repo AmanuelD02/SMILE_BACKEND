@@ -1,7 +1,7 @@
 from django.db.models import fields
 from rest_framework import serializers
 
-from .models import Availability, PendingAppointment, AppointmentMessage
+from .models import Appointment, Availability, PendingAppointment, AppointmentMessage
 
 
 
@@ -14,14 +14,15 @@ class AvailabiltySerializer(serializers.ModelSerializer):
 
 
 class PendingAppointmentSerializer(serializers.ModelSerializer):
+    available_at = serializers.DateTimeField(format = "%Y-%m-%dT%H:%M:%S")
     class Meta:
         model = PendingAppointment
-        fields = ['id', 'dentist_id', 'user_id', 'available_at', 'treatment_id']
+        fields = ['id', 'dentist_id', 'user_id', 'available_at',  'treatment_id']
         read_only_fields = ['id']
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PendingAppointment
+        model = Appointment
         fields = ['id','dentist_id', 'user_id', 'available_at', 'treatment_id']
         read_only_fields = ['id']
 

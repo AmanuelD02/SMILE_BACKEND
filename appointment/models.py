@@ -8,7 +8,7 @@ from treatment.models import Treatment
 class Availability(models.Model):
     id = models.AutoField(primary_key=True)
     dentist_id = models.ForeignKey(Dentist,on_delete=models.CASCADE)
-    available_at = models.DateTimeField()
+    available_at = models.DateTimeField(unique=True)
 
 
 
