@@ -21,7 +21,7 @@ from rest_framework import status, generics
 from rest_framework_swagger import renderers
 import jwt
 from rest_framework import status
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Address, Link, User, Dentist, Verification, Location
 from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
@@ -105,15 +105,15 @@ class SendOTPView(APIView):
 
             verification.save()
 
-        body = f"Your Smile Verification code is {str(otp)}"
-        message = client.messages.create(
-            from_=phone_number,
-            body=body,
-            to=recipient_phone_number
-        )
+        # body = f"Your Smile Verification code is {str(otp)}"
+        # message = client.messages.create(
+        #     from_=phone_number,
+        #     body=body,
+        #     to=recipient_phone_number
+        # )
 
-        if message.sid:
-        # if otp:
+        # if message.sid:
+        if otp:
             return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
         return Response("Error")
 
@@ -138,7 +138,6 @@ class AuthenticateOTPView(APIView):
                     if user == None:
                         raise AttributeError
                     token = Utils.encode_token(user)
-                    print(token)
                     serializer = UserSerializer(user)
                     data["message"] = "User Logged in"
                     data["phone_num"] = user.phone_num
@@ -148,7 +147,7 @@ class AuthenticateOTPView(APIView):
 
                     return Response(response)
 
-                except:
+                except User.DoesNotExist:
                     message = "Please Register to Continue"
                     unauthorized_user_data = {
                         "phone_num": phone_num, "message": message}
@@ -172,23 +171,29 @@ def generateOTP():
 
 
 class EditProfileView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def put(self, request):
+        JWT_authenticator = JWTAuthentication()
         # Check and validate TOken from user
-        token = request.headers["Authorization"]
+        # token = request.headers["Authorization"]
         user_id = ""
         request_data = request.data.dict()
-        try:
-            decoded_token = Utils.decode_token(token, "SNAKE_POO")
-            print(decoded_token)
-            user_id = decoded_token['id']
-            print(user_id)
-            #serializer = UserEditSerializer(data=request.data.dict())
+        # try:
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            user, token = response
+            user_id = user.id
+        else:
+            return Response({"message": "Invalid Token"})
+        # print(decoded_token)
+        # user_id = decoded_token['id']
+        # print(user_id)
+        #serializer = UserEditSerializer(data=request.data.dict())
 
-        except jwt.ExpiredSignatureError:
-            return Response({"message": "Authentication Failed"}, status=status.HTTP_401_UNAUTHORIZED)
+        # except jwt.ExpiredSignatureError:
+        #     return Response({"message": "Authentication Failed"}, status=status.HTTP_401_UNAUTHORIZED)
 
         user = User.objects.filter(id=user_id).first()
         if user != None:
@@ -331,13 +336,14 @@ class LinkDetailView(APIView):
 ##
 class DentistDetailView(APIView):
     parser_classes = (MultiPartParser, FormParser)
+
     def get(self, request, id):
         dentist = get_object_or_404(Dentist, pk=id)
         serializer = DentistSerializer(dentist)
 
         return Response(serializer.data)
 
-    def put(self, request,id):
+    def put(self, request, id):
         dentist = get_object_or_404(Dentist, pk=request.data['id'])
 
         serializer = DentistSerializer(dentist, data=request.data)
@@ -354,8 +360,9 @@ class DentistDetailView(APIView):
 
 class DentistView(APIView):
     parser_classes = (MultiPartParser, FormParser)
+
     def post(self, request):
-        
+
         serializer = DentistSerializer(data=request.data.dict())
         serializer.is_valid(raise_exception=True)
         serializer.save()
