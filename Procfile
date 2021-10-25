@@ -1,1 +1,1 @@
-web: gunicorn <smile-db>.wsgi --log-file -
+web: gunicorn smile-db.wsgi --log-file -
