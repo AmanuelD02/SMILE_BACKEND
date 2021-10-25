@@ -9,16 +9,18 @@ def upload_to(instance, filename):
 
 
 def upload_to_document(instance, filename):
-    return 'document\{datetime}{filename}'.format(datetime=datetime.now(), filename= filename)
+    return 'document\{datetime}{filename}'.format(datetime=datetime.now(), filename=filename)
+
+
 class User(AbstractUser):
-    DENTIST_ROLE = 'D'
-    PATIENT_ROLE = 'P'
-    USER_ROLE_CHOICES = [(DENTIST_ROLE, 'Dentist'), (PATIENT_ROLE, 'Patient')]
+    DENTIST_ROLE = 'Dentist'
+    PATIENT_ROLE = 'Patient'
+    USER_ROLE_CHOICES = [(DENTIST_ROLE, 'D'), (PATIENT_ROLE, 'P')]
 
     full_name = models.CharField(max_length=255)
     phone_num = models.CharField(max_length=15, unique=True)
     role = models.CharField(
-        max_length=1, choices=USER_ROLE_CHOICES, default=DENTIST_ROLE)
+        max_length=100, choices=USER_ROLE_CHOICES, default=PATIENT_ROLE)
 
     date_of_birth = models.DateField(null=True)
     bio = models.TextField(null=True)

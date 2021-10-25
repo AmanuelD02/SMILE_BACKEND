@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User
-import jwt
+from rest_framework_simplejwt.tokens import RefreshToken
 import datetime
 import os
 
@@ -13,14 +13,19 @@ class Utils:
         payload = {
             'id': user.id,
             'role': user.role,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=2),
-            'iat': datetime.datetime.utcnow()
         }
-        token = jwt.encode(payload, "SNAKE_POO", algorithm='HS256')
-        return token
+        token = RefreshToken.for_user(user)
+        token.payload['TOKEN_TYPE_CLAIM'] = 'access'
+        #token = jwt.encode(payload, "SNAKE_POO", algorithm='HS256')
+        return {
+            'refresh': str(token),
+            'access': str(token.access_token),
+        }
 
     @staticmethod
     def decode_token(encoded_jwt, secret):
+
+        response = JWT_authenticator.authenticate(request)
         decoded_value = jwt.decode(encoded_jwt, secret, algorithms=["HS256"])
         return decoded_value
 
