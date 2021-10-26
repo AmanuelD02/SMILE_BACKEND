@@ -16,7 +16,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smile.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    # "websocket": AuthMiddlewareStack(
-    #     # add a url router here
-    # )
+    "websocket": AuthMiddlewareStack(
+        consultation.routing.websocket.urlpatterns
+    )
 })
