@@ -2,8 +2,15 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 
 
+
+
 class ChatConsumer(WebsocketConsumer):
+
     def connect(self):
+        appointment_id = self.scope['url_route']['kwargs']['appointment_id']
+        self.room_name = f"appointment_thread_{appointment_id}"
+
+        
         self.accept()
 
     def disconnect(self, close_code):

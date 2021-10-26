@@ -114,7 +114,7 @@ class AppointmentView(APIView):
 
 
 class AppointmentListView(ListAPIView):
-    serializer_class = AppointmentView
+    serializer_class = AppointmentSerializer
     pagination_class = PageNumberPagination
     def get_queryset(self):
         dentist_id = self.request.query_params.get('dentist_id',None)
