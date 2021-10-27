@@ -158,7 +158,7 @@ class AuthenticateOTPView(APIView):
                     Verification.objects.filter(
                         phone_num=phone_num).update(is_verified=True)
                     return Response(unauthorized_user)
-
+            
         else:
             return Response({
                 "message": "Verification Code Expired. Please try again."
