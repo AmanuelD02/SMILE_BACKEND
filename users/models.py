@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 # Create your models here.
 
 
@@ -10,6 +10,36 @@ def upload_to(instance, filename):
 
 def upload_to_document(instance, filename):
     return 'document\{datetime}{filename}'.format(datetime=datetime.now(), filename=filename)
+
+class CustomUserManager(BaseUserManager):
+    """Define a model manager for User model with no username field."""
+
+    def _create_user(self, phone_num, password=None, **extra_fields):
+        """Create and save a User with the given phone_num and password."""
+        if not phone_num:
+            raise ValueError('The given phone_num must be set')
+        
+        user = self.model(phone_num=phone_num, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, phone_num, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(phone_num, password, **extra_fields)
+
+    def create_superuser(self, phone_num, password=None, **extra_fields):
+        """Create and save a SuperUser with the given phone_num and password."""
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self._create_user(phone_num, password, **extra_fields)
 
 
 class User(AbstractUser):
@@ -26,12 +56,12 @@ class User(AbstractUser):
     bio = models.TextField(null=True)
     profile_pic = models.ImageField(
         upload_to=upload_to, default='media\default.png')
-    slug = models.SlugField(null=True)
+    # slug = models.SlugField(null=True)
     username = None
-    password = None
+    # password = None
 
     USERNAME_FIELD = 'phone_num'
-
+    objects = CustomUserManager()
 
 class Verification(models.Model):
     phone_num = models.CharField(max_length=15, unique=True, primary_key=True)
