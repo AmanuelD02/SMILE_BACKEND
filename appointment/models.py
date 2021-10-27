@@ -27,11 +27,6 @@ class Appointment(models.Model):
     treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
 
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 263e619216c8b3c139c71790da3ddde705d507bb
 class AppointmentChat(models.Model):
     PRE_APPOINTMENT = 'pre'
     POST_APPOINTMENT = 'post'
