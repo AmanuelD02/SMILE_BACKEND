@@ -27,14 +27,6 @@ class Appointment(models.Model):
     treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
 
 
-class AppointmentMessage(models.Model):
-    id = models.AutoField(primary_key=True)
-    chat_id = models.ForeignKey(
-        Appointment, on_delete=models.CASCADE, related_name='appointment_chat')
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
 class AppointmentChat(models.Model):
     PRE_APPOINTMENT = 'pre'
     POST_APPOINTMENT = 'post'
