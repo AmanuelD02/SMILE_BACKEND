@@ -17,6 +17,7 @@ class PendingAppointment(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     available_at = models.DateTimeField()
     treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Appointment(models.Model):
@@ -25,6 +26,7 @@ class Appointment(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     available_at = models.DateTimeField()
     treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class AppointmentChat(models.Model):

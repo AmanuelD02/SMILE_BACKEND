@@ -6,9 +6,9 @@ from users.models import User
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-
+        await self.accept()
         chat_id = self.scope['url_route']['kwargs']['consultation_chat_id']
-
+        print(chat_id)
         self.room_name = f'chat_{chat_id}'
         await self.channel_layer.group_add(
             self.room_name,

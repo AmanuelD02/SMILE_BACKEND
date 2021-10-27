@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 
 import os
 from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from consultation.routing import websocket_consultation_urlpatterns
 from appointment.routing import websocket_appointment_urlpatterns
@@ -18,6 +18,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smile.settings')
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        websocket_consultation_urlpatterns + websocket_appointment_urlpatterns
+        URLRouter(
+            #
+            websocket_consultation_urlpatterns + websocket_appointment_urlpatterns
+        )
     )
 })
