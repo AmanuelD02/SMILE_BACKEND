@@ -1,16 +1,33 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 from django.shortcuts import get_object_or_404
 from users.models import User
+from .models import ConsultationMessage
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
     async def connect(self):
 
-        chat_id = self.scope['url_route']['kwargs']['consultation_chat_id']
-        print(chat_id)
-        self.room_name = f'chat_{chat_id}'
-        print(self.room_name)
+        user = self.scope.get('user', False)
+
+        if user:
+            await self.accept()
+            self.send(text_data=json.dumps({
+                'type': 'message',
+                'date': {
+                    'messge': "Unauthorized Access"
+                }
+            }))
+            await self.close()
+
+        self.user = user
+
+        # chat_id = self.scope['url_route']['kwargs']['consultation_chat_id']
+        # print(chat_id)
+        self.room_name = f'chat'  # Add Chat name from the consultation uuid id
+        # print(self.room_name)
         await self.channel_layer.group_add(
             self.room_name,
             self.channel_name
