@@ -13,13 +13,14 @@ from consultation.routing import websocket_consultation_urlpatterns
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
+from consultation.middleware.tokenAuthMiddleware import TokenAuthMiddleware
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smile.settings')
 
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
+    "websocket": TokenAuthMiddleware(
         URLRouter(
             #
             websocket_consultation_urlpatterns + websocket_appointment_urlpatterns
