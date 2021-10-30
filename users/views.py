@@ -115,7 +115,7 @@ class SendOTPView(APIView):
         # if message.sid:
         if otp:
             return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
-        return Response("Error")
+        return Response({"message": "Invalid Phone Number"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthenticateOTPView(APIView):
