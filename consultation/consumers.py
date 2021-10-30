@@ -3,16 +3,39 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.shortcuts import get_object_or_404
 from users.models import User
-from .models import ConsultationMessage
+from .models import ConsultationMessage, Consultation
+from .utils import get_consultation, verify_consultation_user
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
+        # Receive the consultation id through the kwargs
+        chat_id = self.scope['url_route']['kwargs']['consultation_id']
+        consultation = get_consultation(chat_id)
+        print(chat_id)
 
         user = self.scope.get('user', False)
 
-        if user:
+        if not user:
+            await self.accept()
+            self.send(text_data=json.dumps({
+                'type': 'message',
+                'date': {
+                    'messge': "Unauthorized Access"
+                }
+            }))
+            await self.close()
+        elif not consultation:
+            await self.accept()
+            self.send(text_data=json.dumps({
+                'type': 'message',
+                'date': {
+                    'messge': "Invalid Consultation Data"
+                }
+            }))
+            await self.close()
+        elif not verify_consultation_user(consultation, user):
             await self.accept()
             self.send(text_data=json.dumps({
                 'type': 'message',
@@ -24,9 +47,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         self.user = user
 
-        # chat_id = self.scope['url_route']['kwargs']['consultation_chat_id']
-        # print(chat_id)
-        self.room_name = f'chat'  # Add Chat name from the consultation uuid id
+        # Add Chat name from the consultation uuid id
+        self.room_name = f'chat_{chat_id}'
         # print(self.room_name)
         await self.channel_layer.group_add(
             self.room_name,
