@@ -128,6 +128,7 @@ class AuthenticateOTPView(APIView):
         data = {}
         phone_num = request.data['phone_num']
         code = request.data['code']
+        # device_id = request.data['device_id']
         verification = get_object_or_404(Verification, phone_num=phone_num)
         expiration_interval = datetime.timedelta(seconds=EXPIRATION_INTERVAL)
         if (verification.expiration_date - timezone.now() < expiration_interval):

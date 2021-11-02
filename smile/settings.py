@@ -10,8 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+from dotenv import load_dotenv
+
 from pathlib import Path
 from datetime import datetime, timedelta
+from firebase_admin import initialize_app
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'debug_toolbar',
     'drf_yasg',
+    'fcm_django',
     'users',
     'clinic',
     'treatment',
@@ -51,7 +56,8 @@ INSTALLED_APPS = [
     'appointment',
     'follow',
     'payment',
-    'consultation'
+    'consultation',
+    'notification'
 
 
 ]
@@ -191,4 +197,27 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
     'TOKEN_TYPE_CLAIM': 'access'
+}
+
+from firebase_admin import credentials
+path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+print(path)
+cred = credentials.Certificate(path)
+FIREBASE_APP = initialize_app(cred)
+
+
+FCM_DJANGO_SETTINGS = {
+     # default: _('FCM Django')
+    "APP_VERBOSE_NAME": "[string for AppConfig's verbose_name]",
+     # true if you want to have only one active device per registered user at a time
+     # default: False
+    "ONE_DEVICE_PER_USER": True,
+     # devices to which notifications cannot be sent,
+     # are deleted upon receiving error response from FCM
+     # default: False
+    "DELETE_INACTIVE_DEVICES": True,
+    # Transform create of an existing Device (based on registration id) into
+                # an update. See the section
+    # "Update of device with duplicate registration ID" for more details.
+    "UPDATE_ON_DUPLICATE_REG_ID": True,
 }

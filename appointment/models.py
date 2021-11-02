@@ -2,6 +2,15 @@ from django.db import models
 
 from users.models import User, Dentist
 from treatment.models import Treatment
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+from fcm_django.models import FCMDevice
+
+from firebase_admin.messaging import Message, Notification
 # Create your models here.
 
 
@@ -53,3 +62,16 @@ class AppointmentMessage(models.Model):
         User, on_delete=models.CASCADE, related_name="appointment_sender")
     reciever_id = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="appointment_reciever")
+
+
+
+@receiver(post_save, sender=Appointment)
+def notify_users(sender, instance, **kwargs):
+    # notify users here
+    title = "Appointment"
+    body = "Appointment Approved!"
+
+    reciever_id = instance.user_id
+    FCMDevice.objects.filter(user_id = reciever_id).send_message(message=Message(notification=Notification(title=title, body=body)))
+        # FCMDevice.objects.all().send_message(message:Message(Notification(title="Appointment success",body="The Densitst dentist_id has approved ur appointment")))
+    
