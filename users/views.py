@@ -142,7 +142,8 @@ class AuthenticateOTPView(APIView):
                     data["message"] = "User Logged in"
                     data["phone_num"] = user.phone_num
                     user_serializer = UserSerializer(user)
-                    response = {"data": user_serializer.data, "token": token}
+                    response = {"data": user_serializer.data,
+                                "token": token, "registered": "true"}
                     Verification.objects.filter(phone_num=phone_num).delete()
 
                     return Response(response)
@@ -150,7 +151,7 @@ class AuthenticateOTPView(APIView):
                 except User.DoesNotExist:
                     message = "Please Register to Continue"
                     unauthorized_user_data = {
-                        "phone_num": phone_num, "message": message}
+                        "phone_num": phone_num, "message": message, "registered": "false"}
                     unauthorized_user = UnauthorizedUserSerializer(
                         unauthorized_user_data).data
 
