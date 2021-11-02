@@ -1,19 +1,24 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
-from asgiref.sync import sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from django.shortcuts import get_object_or_404
+from users.models import User
+from .models import Appointment, AppointmentMessage
 
 
-class ChatConsumer(WebsocketConsumer):
+class ChatConsumer(AsyncWebsocketConsumer()):
     def websocket_connect(self, message):
         appointment_id = self.scope['url_route']['kwargs']['appointment_id']
         self.room_name = f"appointment_thread_{appointment_id}"
-        sync_to_async(self.channel_layer.group_add)(self.room_name, self.channel_name)
+        sync_to_async(self.channel_layer.group_add)(
+            self.room_name, self.channel_name)
 
         self.send({
             "type": "websocket.accept"
-        })        
-        
+        })
+
         return super().websocket_connect(message)
+
     def connect(self):
         self.accept()
 
