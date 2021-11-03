@@ -30,6 +30,6 @@ class Payment(models.Model):
     payer = models.ForeignKey(User, on_delete=models.CASCADE ,related_name="payment_payer")
     reciever =  models.ForeignKey(User, on_delete=models.CASCADE, related_name="payment_reciever")
     amount = models.DecimalField(max_digits=1000, decimal_places=2)
-    service_type = models.CharField(max_length=1, choices=SERVICE_TYPES, default=SERVICE_APPOINTMENT)
+    service_type = models.CharField(max_length=100, choices=SERVICE_TYPES, default=SERVICE_APPOINTMENT)
     service_date = models.DurationField(auto_created=True)
 

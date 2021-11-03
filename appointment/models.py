@@ -7,6 +7,7 @@ from treatment.models import Treatment
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from notification.models import Notification  as Notify    
 
 from fcm_django.models import FCMDevice
 
@@ -70,6 +71,16 @@ def notify_users(sender, instance, **kwargs):
     # notify users here
     title = "Appointment"
     body = "Appointment Approved!"
+
+    notification = Notify()
+    notification.type = 'appointment'
+    notification.content = body
+    notification.sender_id = instance.dentist_id
+    notification.reciever_id = instance.user_id
+
+
+    notification.save()
+
 
     reciever_id = instance.user_id
     FCMDevice.objects.filter(user_id = reciever_id).send_message(message=Message(notification=Notification(title=title, body=body)))

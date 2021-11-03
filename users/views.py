@@ -24,7 +24,7 @@ from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
+from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -369,3 +369,12 @@ class DentistView(APIView):
         serializer.save()
 
         return Response(serializer.data)
+
+
+class DentistAllInfoView(APIView):
+    def get(self,request,id):
+        user = get_object_or_404(Dentist, pk=id)
+        serializer = AllInformationSerializer(user)
+
+        return Response(serializer.data)
+    
