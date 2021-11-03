@@ -52,8 +52,8 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=100, choices=USER_ROLE_CHOICES, default=PATIENT_ROLE)
 
-    date_of_birth = models.DateField(null=True)
-    bio = models.TextField(null=True)
+    date_of_birth = models.DateField(blank=True)
+    bio = models.TextField(blank=True)
     profile_pic = models.ImageField(
         upload_to=upload_to, default='media\default.png')
     # slug = models.SlugField(null=True)
