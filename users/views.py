@@ -157,7 +157,7 @@ class AuthenticateOTPView(APIView):
                 except User.DoesNotExist:
                     message = "Please Register to Continue"
                     unauthorized_user_data = {
-                        "phone_num": phone_num, "message": message, "registered": "false"}
+                        "phone_num": phone_num, "message": message, "registered": false}
                     unauthorized_user = UnauthorizedUserSerializer(
                         unauthorized_user_data).data
 

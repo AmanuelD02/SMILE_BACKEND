@@ -11,6 +11,7 @@ class OTPSerializer(serializers.ModelSerializer):
 class UnauthorizedUserSerializer(serializers.Serializer):
     phone_num = serializers.CharField(max_length=15)
     message = serializers.CharField(max_length=255)
+    registered = serializers.BooleanField()
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -22,7 +23,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'phone_num','profile_pic', 'role']
+        fields = ['id', 'full_name', 'phone_num', 'profile_pic', 'role']
 
 
 class UserEditSerializer(serializers.Serializer):
