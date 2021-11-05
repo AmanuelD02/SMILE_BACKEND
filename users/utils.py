@@ -29,6 +29,10 @@ class Utils:
         decoded_value = jwt.decode(encoded_jwt, secret, algorithms=["HS256"])
         return decoded_value
 
+    @staticmethod
+    def generateOTP():
+        return random.randrange(100000, 999999)
+
 
 def update_user_account(full_name, phone_num, role, date_of_birth, bio, profile_pic_path, slug, username=None):
     user = User.objects.filter(phone_num=phone_num).update(

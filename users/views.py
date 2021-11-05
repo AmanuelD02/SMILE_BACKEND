@@ -84,7 +84,7 @@ class SendOTPView(APIView):
         client = Client(account_sid, auth_token)
         recipient_phone_number = request.data['phone_number']
 
-        otp = generateOTP()
+        otp = Utils.generateOTP()
 
         try:
             verification = Verification.objects.get(
@@ -113,6 +113,13 @@ class SendOTPView(APIView):
         # )
 
         # if message.sid:
+        #     twilio_response = json.loads(message.sid)
+        #     if twilio_response['status'] == 'sent':
+        #         return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
+
+        #     # If twilio responds with "Invalid Phone Number" error
+        #     elif int(twilio_response['error_code']) == 60033:
+        #         return Response({"message": twilio_response['error_message']}, status=status.HTTP_400_BAD_REQUEST)
         if otp:
             return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
         return Response({"message": "Invalid Phone Number"}, status=status.HTTP_400_BAD_REQUEST)
@@ -146,7 +153,7 @@ class AuthenticateOTPView(APIView):
                                 "token": token, "registered": "true"}
                     Verification.objects.filter(phone_num=phone_num).delete()
 
-                    return Response(response)
+                    return Response(response, status=status.HTTP_200_OK)
 
                 except User.DoesNotExist:
                     message = "Please Register to Continue"
@@ -158,17 +165,15 @@ class AuthenticateOTPView(APIView):
                     ##is_verified = true
                     Verification.objects.filter(
                         phone_num=phone_num).update(is_verified=True)
-                    return Response(unauthorized_user)
-
+                    return Response(unauthorized_user, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "message": "Incorrect Verification Code."
+                }, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
         else:
             return Response({
                 "message": "Verification Code Expired. Please try again."
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-
-def generateOTP():
-
-    return random.randrange(100000, 999999)
+            }, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
 
 
 class EditProfileView(APIView):
@@ -187,7 +192,7 @@ class EditProfileView(APIView):
             user, token = response
             user_id = user.id
         else:
-            return Response({"message": "Invalid Token"})
+            return Response({"message": "Invalid Authorization Token"}, status=status.HTTP_401_UNAUTHORIZED)
         # print(decoded_token)
         # user_id = decoded_token['id']
         # print(user_id)
@@ -206,7 +211,7 @@ class EditProfileView(APIView):
             user.save(update_fields=['full_name',
                       "date_of_birth", 'bio', 'profile_pic'])
 
-            return Response({"Message": "Successfully Updated"})
+            return Response({"Message": "Successfully Updated"}, status=status.HTTP_200_OK)
             # else:
             #     return Response({"message": "Invalid Input"}, status=status.HTTP_400_BAD_REQUEST)
         else:
