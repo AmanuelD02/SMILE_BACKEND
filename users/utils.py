@@ -3,6 +3,7 @@ from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 import datetime
 import os
+import random
 
 SECRET_KEY = os.getenv('JWT_SECRET')
 

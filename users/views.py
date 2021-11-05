@@ -1,5 +1,4 @@
 import os
-import random
 import json
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -177,6 +176,9 @@ class AuthenticateOTPView(APIView):
 
 
 class EditProfileView(APIView):
+    """
+    A view for user to edit profile. Authentication is required
+    """
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
