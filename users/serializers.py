@@ -56,6 +56,7 @@ class DentistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dentist
         fields = '__all__'
+        read_only_fields = ['rating','verified']
 
 
 class AllInformationSerializer(serializers.ModelSerializer):

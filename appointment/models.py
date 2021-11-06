@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 
 from users.models import User, Dentist
@@ -75,8 +76,9 @@ def notify_users(sender, instance, **kwargs):
     notification = Notify()
     notification.type = 'appointment'
     notification.content = body
-    notification.sender_id = instance.dentist_id
+    notification.sender_id = instance.dentist_id.id
     notification.reciever_id = instance.user_id
+    notification.created_at = datetime.now()
 
 
     notification.save()

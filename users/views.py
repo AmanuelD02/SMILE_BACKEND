@@ -57,7 +57,11 @@ class RegisterView(APIView):
                     raise Verification.DoesNotExist
                 serializer.save()
                 user = User.objects.get(phone_num=phone_num)
+                
                 user_serializer = UserSerializer(user)
+
+           
+
                 token = Utils.encode_token(user)
 
                 Verification.objects.filter(phone_num=phone_num).delete()
@@ -114,7 +118,7 @@ class SendOTPView(APIView):
 
         # if message.sid:
         if otp:
-            return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
+            return Response({"message": f"Verification Code Sent {str(otp)}"}, status=status.HTTP_201_CREATED)
         return Response("Error")
 
 
