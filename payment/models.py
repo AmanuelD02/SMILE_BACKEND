@@ -8,10 +8,21 @@ class Wallet(models.Model):
 
 
 
+class DepositTransaction(models.Model):
+    TRANSACTION_TYPES = [('Deposit','Deposit'), ('WithDrawal','WithDrawal')]
+
+    id = models.AutoField(primary_key=True)
+    type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
+    payment_id = models.CharField(max_length=255)
+    order_id = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+
 class Payment(models.Model):
-    SERVICE_TREATMENT = 'T'
-    SERVICE_CONSULTATION = 'C'
-    SERVICE_APPOINTMENT = 'A'
+    SERVICE_TREATMENT = 'Treatment'
+    SERVICE_CONSULTATION = 'Consultation'
+    SERVICE_APPOINTMENT = 'Appointment'
 
 
     SERVICE_TYPES= [(SERVICE_TREATMENT, 'Treatment'), (SERVICE_CONSULTATION, 'Consultation'), (SERVICE_APPOINTMENT, 'Appointment')]
@@ -19,6 +30,6 @@ class Payment(models.Model):
     payer = models.ForeignKey(User, on_delete=models.CASCADE ,related_name="payment_payer")
     reciever =  models.ForeignKey(User, on_delete=models.CASCADE, related_name="payment_reciever")
     amount = models.DecimalField(max_digits=1000, decimal_places=2)
-    service_type = models.CharField(max_length=1, choices=SERVICE_TYPES, default=SERVICE_APPOINTMENT)
+    service_type = models.CharField(max_length=100, choices=SERVICE_TYPES, default=SERVICE_APPOINTMENT)
     service_date = models.DurationField(auto_created=True)
 

@@ -15,3 +15,4 @@ class ReviewLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewLike
         fields = ['review_id', 'user_id']
+        depth=2

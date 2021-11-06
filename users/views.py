@@ -23,7 +23,7 @@ from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
+from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -56,7 +56,9 @@ class RegisterView(APIView):
                     raise Verification.DoesNotExist
                 serializer.save()
                 user = User.objects.get(phone_num=phone_num)
+
                 user_serializer = UserSerializer(user)
+
                 token = Utils.encode_token(user)
 
                 Verification.objects.filter(phone_num=phone_num).delete()
@@ -120,7 +122,7 @@ class SendOTPView(APIView):
         #     elif int(twilio_response['error_code']) == 60033:
         #         return Response({"message": twilio_response['error_message']}, status=status.HTTP_400_BAD_REQUEST)
         if otp:
-            return Response({"message": f"Verification Code Sent"}, status=status.HTTP_201_CREATED)
+            return Response({"message": f"Verification Code Sent {str(otp)}"}, status=status.HTTP_201_CREATED)
         return Response({"message": "Invalid Phone Number"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -134,6 +136,7 @@ class AuthenticateOTPView(APIView):
         data = {}
         phone_num = request.data['phone_num']
         code = request.data['code']
+        # device_id = request.data['device_id']
         verification = get_object_or_404(Verification, phone_num=phone_num)
         expiration_interval = datetime.timedelta(seconds=EXPIRATION_INTERVAL)
         if (verification.expiration_date - timezone.now() < expiration_interval):
@@ -374,5 +377,13 @@ class DentistView(APIView):
         serializer = DentistSerializer(data=request.data.dict())
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        return Response(serializer.data)
+
+
+class DentistAllInfoView(APIView):
+    def get(self, request, id):
+        user = get_object_or_404(Dentist, pk=id)
+        serializer = AllInformationSerializer(user)
 
         return Response(serializer.data)

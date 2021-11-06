@@ -1,3 +1,5 @@
+from django.db import models
+from django.db.models import fields
 from rest_framework import serializers
 from .models import Address, Location, User, Verification, Link, Dentist
 
@@ -55,3 +57,15 @@ class DentistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dentist
         fields = '__all__'
+        read_only_fields = ['rating','verified']
+
+
+class AllInformationSerializer(serializers.ModelSerializer):
+    location = LocationSerializer()
+    link = LinkSerializer()
+    address = AddressSerializer()
+    class Meta:
+        model= Dentist
+        fields= ['id', 'clinic_name','degree','appointment_rate','consultation_rate',
+        'experience_year','document_path','verified','rating',
+        'consultation_availabilty', 'location','link','address',]

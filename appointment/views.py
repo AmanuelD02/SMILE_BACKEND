@@ -1,6 +1,8 @@
 
+from datetime import datetime
+from django.db.models import fields
 from django.shortcuts import get_object_or_404
-from django.db import transaction
+from django.db import models, transaction
 
 from rest_framework.response import Response
 from rest_framework import  serializers, status
@@ -8,8 +10,11 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 
+from users.models import Dentist, User
+
 from .models import Appointment, Availability, PendingAppointment
-from .serializer import AppointmentMessageSerializer, AppointmentSerializer, AvailabiltySerializer, PendingAppointmentSerializer
+from .serializer import AppointmentMessageSerializer, AppointmentSerializer, AvailabiltySerializer, PendingAppointmentSerializer, PatientsSerializer
+from appointment import serializer
 
 
 # Create your views here.
@@ -155,4 +160,48 @@ class GetAppointmentMessageView(ListAPIView):
         dentist_id = self.request.query_params.get('chat_id',None)
         queryset = PendingAppointment.objects.filter(dentist_id=dentist_id)
         return queryset.reverse()
-    
+
+
+# class GetAllPatientsView(APIView):
+#     def get(self, request, id):
+#         dentist = get_object_or_404(Dentist,pk= id)
+
+#         patients = Appointment.objects.filter(dentist_id = id)
+        
+#         ss = PatientsSerializer(patients, many=True)
+
+#         return Response(ss.data)
+
+
+class GetAllPatientsView(ListAPIView):
+    serializer_class = PatientsSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        dentist_id = self.request.query_params.get('dentist_id',None)
+        queryset = Appointment.objects.filter(dentist_id=dentist_id).distinct()
+        return queryset
+
+
+#TODO
+# FETCH LIST OF PATIENTS THAT ARE ALREADY TREATED OR THE APPOINTMENT HAS PASSED
+class GetTreatedPatientsView(ListAPIView):
+    serializer_class = PatientsSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        dentist_id = self.request.query_params.get('dentist_id',None)
+        queryset = Appointment.objects.filter(dentist_id=dentist_id).filter(available_at__lte=datetime.now())
+        return queryset
+
+
+#TODO
+# FETCH LIST OF PATIENTS THAT ARE ALREADY TREATED OR THE APPOINTMENT HAS PASSED
+# class GetPendingPatientsView(ListAPIView):
+#     serializer_class = PatientsSerializer
+#     pagination_class = PageNumberPagination
+
+#     def get_queryset(self):
+#         dentist_id = self.request.query_params.get('dentist_id',None)
+#         queryset = Appointment.objects.filter(dentist_id=dentist_id).filter(available_at__gte=datetime.now())
+#         return queryset
