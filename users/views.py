@@ -10,7 +10,6 @@ from django.utils import timezone
 from dotenv import load_dotenv
 from twilio.rest import Client
 
-
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -66,8 +65,6 @@ class RegisterView(APIView):
 
                 # Delete the verification information from the verification table
                 Verification.objects.filter(phone_num=phone_num).delete()
-
-                # create a contact model for the user
 
                 return Response({"data": user_serializer.data, "token": token}, status=status.HTTP_201_CREATED)
             except Verification.DoesNotExist:
@@ -402,5 +399,6 @@ class SearchDentistListView(ListAPIView):
 
     def get_queryset(self):
         name = self.request.query_params.get('full_name')
-        queryset = User.objects.filter(full_name__contains=name).filter(role="Dentist")
+        queryset = User.objects.filter(
+            full_name__contains=name).filter(role="Dentist")
         return queryset

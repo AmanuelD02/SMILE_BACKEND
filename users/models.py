@@ -1,7 +1,19 @@
+import payment
 from datetime import datetime
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-# Create your models here.
+import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+SECRET_KEY = os.getenv('JWT_SECRET')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+RAZORPAY_CONTACT_ENDPOINT = os.getenv('RAZORPAY_CONTACT_ENDPOINT')
+RAZORPAY_FUND_ACCOUNT_ENDPOINT = os.getenv('RAZORPAY_FUND_ACCOUNT_ENDPOINT')
 
 
 def upload_to(instance, filename):
@@ -11,6 +23,7 @@ def upload_to(instance, filename):
 def upload_to_document(instance, filename):
     return 'document\{datetime}{filename}'.format(datetime=datetime.now(), filename=filename)
 
+
 class CustomUserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
 
@@ -18,7 +31,7 @@ class CustomUserManager(BaseUserManager):
         """Create and save a User with the given phone_num and password."""
         if not phone_num:
             raise ValueError('The given phone_num must be set')
-        
+
         user = self.model(phone_num=phone_num, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -62,6 +75,34 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'phone_num'
     objects = CustomUserManager()
+
+
+@receiver(post_save, sender=User)
+def create_contact_account(sender, instance, **kwargs):
+    api_key = RAZORPAY_KEY_ID
+    api_key_secret = RAZORPAY_KEY_SECRET
+    request_url = RAZORPAY_CONTACT_ENDPOINT
+    #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
+    headers = {api_key: api_key_secret}
+
+    user_id = instance.id
+    full_name = instance.full_name
+    contact = instance.phone_num
+
+    body = {
+        'name': full_name,
+        'contact': contact
+    }
+
+    response = requests.post(request_url, headers=headers, body=body)
+    if response.status_code == 200:
+        response_data = response.json()
+        contact_id = response_data['id']
+        contact_account = payment.models.Contact.objects.create(
+            user_id=user_id,
+            contact_id=contact_id
+        )
+
 
 class Verification(models.Model):
     phone_num = models.CharField(max_length=15, unique=True, primary_key=True)

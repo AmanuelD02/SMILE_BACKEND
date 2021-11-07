@@ -14,6 +14,7 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         models = Contact
         fields = ['user_id', 'account_number', 'contact_id', 'ifsc']
+        read_only_fields = ['user_id', 'contact_id']
 
 
 class FundAccountSerializer(serializers.ModelSerializer):
