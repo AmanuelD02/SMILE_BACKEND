@@ -54,14 +54,17 @@ class RegisterView(APIView):
                     phone_num=phone_num)
                 if verification == None:
                     raise Verification.DoesNotExist
+
                 serializer.save()
                 user = User.objects.get(phone_num=phone_num)
-
                 user_serializer = UserSerializer(user)
-
                 token = Utils.encode_token(user)
 
+                # Delete the verification information from the verification table
                 Verification.objects.filter(phone_num=phone_num).delete()
+
+                # create a contact model for the user
+
                 return Response({"data": user_serializer.data, "token": token}, status=status.HTTP_201_CREATED)
             except Verification.DoesNotExist:
                 return Response({
