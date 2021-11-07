@@ -143,7 +143,7 @@ class AppointmentDetailView(APIView):
 
 
 
-class AppointmentMessagView(APIView):
+class AppointmentMessageView(APIView):
     def post(self, request):
         serializer = AppointmentMessageSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)

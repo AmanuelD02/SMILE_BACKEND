@@ -69,3 +69,11 @@ class AllInformationSerializer(serializers.ModelSerializer):
         fields= ['id', 'clinic_name','degree','appointment_rate','consultation_rate',
         'experience_year','document_path','verified','rating',
         'consultation_availabilty', 'location','link','address',]
+
+
+
+class SearchDentistSerializer(serializers.ModelSerializer):
+    basic = DentistSerializer() 
+    class Meta:
+        model= User
+        fields =['id','phone_num','profile_pic','bio','basic']

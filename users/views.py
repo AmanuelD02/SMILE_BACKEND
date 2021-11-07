@@ -1,29 +1,33 @@
+import jwt
 import os
+import datetime
 import json
+from dotenv import load_dotenv
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+from dotenv import load_dotenv
+from twilio.rest import Client
+
+
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser
-from .utils import Utils
-from twilio.rest import Client
-from dotenv import load_dotenv
-from users.models import Verification, User
-from twilio.rest import Client
-from dotenv import load_dotenv
-import datetime
 from rest_framework import status, generics
-
-
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_swagger import renderers
-import jwt
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from users.models import Verification, User
+from .utils import Utils
+
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
+from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, SearchDentistSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -387,3 +391,13 @@ class DentistAllInfoView(APIView):
         serializer = AllInformationSerializer(user)
 
         return Response(serializer.data)
+
+
+class SearchDentistListView(ListAPIView):
+    serializer_class = SearchDentistSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        name = self.request.query_params.get('full_name')
+        queryset = User.objects.filter(full_name__contains=name)
+        return queryset

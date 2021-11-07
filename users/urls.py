@@ -1,8 +1,10 @@
-from django.urls import path, include
+from django.urls import path
 from .views import RegisterView, SendOTPView, AuthenticateOTPView
 from .views import AddressDetailView, AddressView, DentistDetailView, DentistView,\
     LinkView, LocationView, LocationDetailView, LinkDetailView, EditProfileView, \
-        DentistAllInfoView
+        DentistAllInfoView, SearchDentistSerializer
+
+
 urlpatterns = [
     path('authenticate/get_otp', SendOTPView.as_view()),
     path('authenticate/verify_code', AuthenticateOTPView.as_view()),
@@ -20,5 +22,6 @@ urlpatterns = [
 
     path('dentist/<int:id>/', DentistDetailView.as_view()),
     path('dentist/', DentistView.as_view()),
-    path('dentist/all/<int:id>/',DentistAllInfoView.as_view())
+    path('dentist/all/<int:id>/',DentistAllInfoView.as_view()),
+    path('dentist/search/',SearchDentistSerializer.as_view()),
 ]
