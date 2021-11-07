@@ -41,14 +41,14 @@ class Contact(models.Model):
     user_id = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="contact_user")
     account_number = models.PositiveBigIntegerField(blank=True)
-    contact_id = models.CharField()
-    ifsc = models.CharField(blank=True)
+    contact_id = models.CharField(max_length=255)
+    ifsc = models.CharField(blank=True, max_length=255)
 
 
 class FundAccount(models.Model):
     user_id = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="user_fund_account")
-    fund_account = models.CharField()
-    entity = models.CharField()
+    fund_account = models.CharField(max_length=255)
+    entity = models.CharField(max_length=255)
     is_active = models.BooleanField()
-    account_type = models.CharField()
+    account_type = models.CharField(max_length=255)

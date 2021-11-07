@@ -73,7 +73,12 @@ class AllInformationSerializer(serializers.ModelSerializer):
 
 
 class SearchDentistSerializer(serializers.ModelSerializer):
-    basic = DentistSerializer() 
+    
     class Meta:
         model= User
-        fields =['id','phone_num','profile_pic','bio','basic']
+        fields =['id','phone_num','profile_pic','bio','full_name']
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        dentist = Dentist.objects.get(pk= instance.id)
+        representation['dentist_info'] = DentistSerializer(dentist).data
+        return representation

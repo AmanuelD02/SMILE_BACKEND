@@ -402,5 +402,5 @@ class SearchDentistListView(ListAPIView):
 
     def get_queryset(self):
         name = self.request.query_params.get('full_name')
-        queryset = User.objects.filter(full_name__contains=name)
+        queryset = User.objects.filter(full_name__contains=name).filter(role="Dentist")
         return queryset

@@ -13,6 +13,6 @@ class NotificationView(ListAPIView):
     serializer_class = NotificationSerializer
     pagination_class = PageNumberPagination
     def get_queryset(self):
-        dentist_id = self.request.query_params.get('dentist_id')
-        queryset = Notification.objects.filter(dentist_id=dentist_id)
-        return queryset
+        reciever_id = self.request.query_params.get('reciever_id')
+        queryset = Notification.objects.filter(reciever_id=reciever_id)
+        return queryset.reverse()
