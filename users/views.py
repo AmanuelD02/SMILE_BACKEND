@@ -156,6 +156,9 @@ class AuthenticateOTPView(APIView):
     def post(self, request):
         data = {}
         phone_num = request.data['phone_num']
+        notification_id = request.data.get("notification_id")
+        if notification_id ==None:
+            return Response("notification id is required",status=status.HTTP_400_BAD_REQUEST)
         code = request.data['code']
         # device_id = request.data['device_id']
         verification = get_object_or_404(Verification, phone_num=phone_num)
@@ -174,6 +177,11 @@ class AuthenticateOTPView(APIView):
                     user_serializer = UserSerializer(user)
                     response = {"data": user_serializer.data,
                                 "token": token, "registered": True}
+                    notification = FCMDevice.objects.filter(user=user).first()
+
+                    notification.registration_id = notification_id
+                    notification.clean()
+                    notification.save()
                     Verification.objects.filter(phone_num=phone_num).delete()
 
                     return Response(response, status=status.HTTP_200_OK)

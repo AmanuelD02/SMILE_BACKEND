@@ -49,7 +49,7 @@ class  AvailabiltyListView(ListAPIView):
 
     def get_queryset(self):
         dentist_id = self.request.query_params.get('dentist_id',None)
-        queryset = Availability.objects.filter(dentist_id=dentist_id)
+        queryset = Availability.objects.filter(dentist_id=dentist_id).filter(available_at__gt=datetime.now())
         return queryset
 
 
@@ -90,7 +90,7 @@ class  PendingAppointmentListView(ListAPIView):
     pagination_class = PageNumberPagination
     def get_queryset(self):
         dentist_id = self.request.query_params.get('dentist_id',None)
-        queryset = PendingAppointment.objects.filter(dentist_id=dentist_id).order_by('available_at')
+        queryset = PendingAppointment.objects.filter(dentist_id=dentist_id).filter(available_at__gt=datetime.now()).order_by('available_at')
         return queryset
 
 class AppointmentView(APIView):
