@@ -1,17 +1,11 @@
 from datetime import datetime
 from django.db import models
-
 from users.models import User, Dentist
 from treatment.models import Treatment
-
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
-from notification.models import Notification  as Notify    
-
+from notification.models import Notification as Notify
 from fcm_django.models import FCMDevice
-
 from firebase_admin.messaging import Message, Notification
 # Create your models here.
 
@@ -66,7 +60,6 @@ class AppointmentMessage(models.Model):
         User, on_delete=models.CASCADE, related_name="appointment_reciever")
 
 
-
 @receiver(post_save, sender=Appointment)
 def notify_users(sender, instance, **kwargs):
     # notify users here
@@ -80,9 +73,7 @@ def notify_users(sender, instance, **kwargs):
     notification.reciever_id = instance.user_id
     notification.created_at = datetime.now()
 
-
     notification.save()
-
 
     reciever_id = instance.user_id
     FCMDevice.objects.filter(user_id = reciever_id).send_message(message=Message(notification=Notification(title=title, body=body)))
