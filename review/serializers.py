@@ -20,6 +20,7 @@ class ReviewLikeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        del representation['review_id']['user_id']
         del representation['user_id']['password']
         del representation['user_id']['last_login']
         del representation['user_id']['is_superuser']
@@ -31,3 +32,9 @@ class ReviewLikeSerializer(serializers.ModelSerializer):
         del representation['user_id']['is_staff']
         del representation['user_id']['is_active']
         return representation
+
+class GetReviewLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewLike
+        fields = ['review_id', 'user_id']
+   

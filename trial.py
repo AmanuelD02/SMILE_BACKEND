@@ -36,4 +36,27 @@ def post():
         print("error")
 
 
-post()
+# post()
+
+
+def call():
+    account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+    auth_token = os.getenv('TWILIO_ACCOUNT_TOKEN')
+    phone_number = os.getenv('TWILIO_PHONE_NUMBER')
+
+    client = Client(account_sid, auth_token)
+    send_to = '+251935024844'
+    print("sender - ", phone_number)
+    print("recipient - ", send_to)
+
+    otp = generateOTP()
+    print("otp ", otp)
+    call = client.calls.create(
+                        url='http://demo.twilio.com/docs/voice.xml',
+                        to='+15558675310',
+                        from_='+15017122661'
+                    )
+    print(call.sid)
+
+
+call()

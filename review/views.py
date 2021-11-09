@@ -5,7 +5,7 @@ from rest_framework import serializers, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListAPIView
 from .models import Review, ReviewLike
-from .serializers import ReviewLikeSerializer, ReviewSerializer
+from .serializers import ReviewLikeSerializer, ReviewSerializer,GetReviewLikeSerializer
 
 # Create your views here.
 
@@ -63,7 +63,7 @@ class ReviewLikeView(APIView):
 
     # like a post
     def post(self, request, review_id: int):
-        serializer = ReviewLikeSerializer(data= request.data)
+        serializer = GetReviewLikeSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -71,11 +71,11 @@ class ReviewLikeView(APIView):
 
     # unlike a post
     def delete(self, request, review_id: int):
-        serializer = ReviewLikeSerializer(data= request.data)
+        serializer = GetReviewLikeSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
         # like = serializer.data
 
-        like = get_object_or_404(ReviewLike, review_id = review_id, user_id = serializer.data.user_id)
+        like = get_object_or_404(ReviewLike, review_id = review_id, user_id = serializer.validated_data['user_id'])
         like.delete()
 
         return Response(status= status.HTTP_204_NO_CONTENT)

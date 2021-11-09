@@ -11,6 +11,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 
 from users.models import Dentist, User
+from django.db.models import Q
 
 from .models import Appointment, Availability, PendingAppointment
 from .serializer import AppointmentMessageSerializer, AppointmentSerializer, AvailabiltySerializer, PendingAppointmentSerializer, PatientsSerializer
@@ -119,12 +120,12 @@ class AppointmentView(APIView):
 
 
 class AppointmentListView(ListAPIView):
-    serializer_class = AppointmentView
+    serializer_class = AppointmentSerializer
     pagination_class = PageNumberPagination
     def get_queryset(self):
         dentist_id = self.request.query_params.get('dentist_id',None)
         user_id = self.request.query_params.get('user_id',None)
-        queryset = Appointment.objects.filter(dentist_id=dentist_id,user_id = user_id )
+        queryset = Appointment.objects.filter(Q(dentist_id=dentist_id) | Q(user_id= user_id) )
         return queryset
 
 

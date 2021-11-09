@@ -1,3 +1,4 @@
+from django.http.response import HttpResponseRedirect
 import jwt
 import os
 import datetime
@@ -23,11 +24,14 @@ from rest_framework_swagger import renderers
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from fcm_django.models import FCMDevice
 from users.models import Verification, User
 from .utils import Utils
 
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, SearchDentistSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer, UserEditSerializer
+from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, \
+SearchDentistSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer,\
+     UserEditSerializer, TopDentistSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -46,11 +50,15 @@ class RegisterView(APIView):
     def post(self, request, format=None):
         data = request.data.dict()
         phone_num = data['phone_num']
+        notification_id = data['notification_id']
+        # del data['notification_id']
         if User.objects.filter(phone_num=phone_num).first():
             return Response({"message": "Phone Number already used, please use a different one."},
                             status=status.HTTP_409_CONFLICT)
         serializer = UserRegisterSerializer(data=data)
 
+        serializer.is_valid(raise_exception=True)
+      
         if serializer.is_valid():
 
             try:
@@ -61,6 +69,14 @@ class RegisterView(APIView):
 
                 serializer.save()
                 user = User.objects.get(phone_num=phone_num)
+                notification = FCMDevice()
+                notification.registration_id= notification_id
+                notification.active = True
+                notification.user= user
+                notification.name = user.full_name
+
+                notification.clean()
+                notification.save()
                 user_serializer = UserSerializer(user)
                 token = Utils.encode_token(user)
 
@@ -79,6 +95,7 @@ class RegisterView(APIView):
             return Response({
                 "message": "Unsupported Data Type"
             }, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SendOTPView(APIView):
@@ -403,4 +420,14 @@ class SearchDentistListView(ListAPIView):
     def get_queryset(self):
         name = self.request.query_params.get('full_name')
         queryset = User.objects.filter(full_name__contains=name).filter(role="Dentist")
+        return queryset
+
+
+
+class TopDentistListView(ListAPIView):
+    serializer_class = TopDentistSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        queryset = Dentist.objects.order_by("-rating")
         return queryset
