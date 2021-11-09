@@ -192,17 +192,17 @@ class GetTreatedPatientsView(ListAPIView):
 
     def get_queryset(self):
         dentist_id = self.request.query_params.get('dentist_id',None)
-        queryset = Appointment.objects.filter(dentist_id=dentist_id).filter(available_at__lte=datetime.now())
+        queryset = Appointment.objects.filter(dentist_id=dentist_id).filter(available_at__lte=datetime.now()).order_by("-available_at")
         return queryset
 
 
 #TODO
 # FETCH LIST OF PATIENTS THAT ARE ALREADY TREATED OR THE APPOINTMENT HAS PASSED
-# class GetPendingPatientsView(ListAPIView):
-#     serializer_class = PatientsSerializer
-#     pagination_class = PageNumberPagination
+class GetPendingPatientsView(ListAPIView):
+    serializer_class = PatientsSerializer
+    pagination_class = PageNumberPagination
 
-#     def get_queryset(self):
-#         dentist_id = self.request.query_params.get('dentist_id',None)
-#         queryset = Appointment.objects.filter(dentist_id=dentist_id).filter(available_at__gte=datetime.now())
-#         return queryset
+    def get_queryset(self):
+        dentist_id = self.request.query_params.get('dentist_id',None)
+        queryset = Appointment.objects.filter(dentist_id=dentist_id).filter(available_at__gte=datetime.now()).order_by("available_at")
+        return queryset
