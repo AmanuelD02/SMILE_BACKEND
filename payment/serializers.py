@@ -22,3 +22,5 @@ class FundAccountSerializer(serializers.ModelSerializer):
         models = FundAccount
         fields = ['user_id', 'fund_account',
                   'entity', 'is_active', 'account_type']
+        read_only_fields = ['user_id', 'fund_account',
+                            'entity', 'is_active', 'account_type']

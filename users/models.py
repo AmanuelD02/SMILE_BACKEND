@@ -9,7 +9,6 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-SECRET_KEY = os.getenv('JWT_SECRET')
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
 RAZORPAY_CONTACT_ENDPOINT = os.getenv('RAZORPAY_CONTACT_ENDPOINT')
@@ -79,6 +78,8 @@ class User(AbstractUser):
 
 @receiver(post_save, sender=User)
 def create_contact_account(sender, instance, **kwargs):
+    if payment.models.Contact.objects.filter(user_id=instance.id).first():
+        return
     api_key = RAZORPAY_KEY_ID
     api_key_secret = RAZORPAY_KEY_SECRET
     request_url = RAZORPAY_CONTACT_ENDPOINT
