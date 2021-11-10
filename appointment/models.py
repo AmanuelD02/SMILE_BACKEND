@@ -76,6 +76,12 @@ def notify_users(sender, instance, **kwargs):
     notification.save()
 
     reciever_id = instance.user_id
-    FCMDevice.objects.filter(user_id=reciever_id).send_message(
-        message=Message(notification=Notification(title=title, body=body)))
-    # FCMDevice.objects.all().send_message(message:Message(Notification(title="Appointment success",body="The Densitst dentist_id has approved ur appointment")))
+    FCMDevice.objects.filter(user_id = reciever_id).send_message(message=Message(notification=Notification(title=title, body=body)))
+        # FCMDevice.objects.all().send_message(message:Message(Notification(title="Appointment success",body="The Densitst dentist_id has approved ur appointment")))
+
+
+@receiver(post_save, sender=Appointment)
+def delete_pending_appointments(sender, instance, **kwargs):
+    appointment_date = instance.available_at
+    pending = PendingAppointment.objects.filter(available_at=appointment_date)
+    pending.delete()

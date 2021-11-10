@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import fields
 from rest_framework import serializers
 from .models import Address, Location, User, Verification, Link, Dentist
-
+from fcm_django.models import FCMDevice
 
 class OTPSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,9 +17,14 @@ class UnauthorizedUserSerializer(serializers.Serializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
+    notification_id = serializers.CharField()
     class Meta:
         model = User
-        fields = ('phone_num', 'full_name', 'profile_pic', 'role')
+        fields = ('phone_num', 'full_name', 'profile_pic', 'role','notification_id')
+    def create(self, validated_data):
+        notification = validated_data.pop('notification_id')
+        user = User.objects.create(**validated_data)
+        return user
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -82,3 +87,11 @@ class SearchDentistSerializer(serializers.ModelSerializer):
         dentist = Dentist.objects.get(pk= instance.id)
         representation['dentist_info'] = DentistSerializer(dentist).data
         return representation
+
+
+class TopDentistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Dentist
+        fields = '__all__'
+        depth=2
+        

@@ -4,8 +4,9 @@ from appointment.models import AppointmentMessage
 from . import views
 
 from .views import AvailabilityView, AvailabiltyListView, AvailabilityDetailView, PendingAppointmentView, PendingAppointmentListView, PendingAppointmentDetailView, AppointmentView, AppointmentListView, AppointmentDetailView, AppointmentMessageView, \
-    GetAppointmentMessageView, GetAllPatientsView \
-    # GetPendingPatientsView
+    GetAppointmentMessageView, GetAllPatientsView, GetTreatedPatientsView,\
+    GetPendingPatientsView
+# GetPendingPatientsView
 
 urlpatterns = [
     path('available/', AvailabilityView.as_view()),
@@ -20,6 +21,8 @@ urlpatterns = [
     path('message/', AppointmentMessageView.as_view()),
     path('message/list/', GetAppointmentMessageView.as_view()),
     path('patients/', GetAllPatientsView.as_view()),
+    path('patients/treated/', GetTreatedPatientsView.as_view()),
+    path('patients/pending/', GetPendingPatientsView.as_view()),
     # path('patients/past/', GetPendingPatientsView.as_view())
     path('', views.index, name='index'),
     path('<int:appointment_chat_id>/',
