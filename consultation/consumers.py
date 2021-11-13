@@ -7,6 +7,20 @@ from .models import ConsultationMessage, Consultation
 from .utils import get_consultation, verify_consultation_user
 
 
+class TaskConsumer(AsyncWebsocketConsumer):
+    async def welcome_message(self, event):
+        message = event.get("message")
+        consultation_id = event.get("consultation_id")
+        consultation = get_consultation(consultation_id=consultation_id)
+        doctor_id = consultation.doctor_id
+        user_id = consultation.user_id
+        await self.create_welcome_message(consultation_id, doctor_id, message)
+
+    @database_sync_to_async
+    def create_welcome_message(self, consultation_id, user, message):
+        return ConsultationMessage.objects.create(chat_id=consultation_id, sender_id=user, content=message)
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
@@ -56,7 +70,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         await self.accept()
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, event):
         await self.channel_layer.group_discard(
             self.room_name,
             self.channel_name
