@@ -1,10 +1,12 @@
 from django.db import models
 from users.models import User
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
+from consultation.models import Consultation
 import requests
 import os
 from dotenv import load_dotenv
+from smile import celery
 # Create your models here.
 
 load_dotenv()
@@ -19,6 +21,24 @@ RAZORPAY_FUND_ACCOUNTS_BANK_ACCOUNT = os.getenv(
 class Wallet(models.Model):
     id = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     balance = models.DecimalField(max_digits=1000, decimal_places=2)
+
+
+@receiver(pre_save, sender=Wallet)
+def check_ongoing_chat_before_withdrawal(sender, instance, **kwargs):
+
+    # Create the celery inspector to inspect all workers
+    i = celery.app.control.inspect()
+    scheduled_tasks = i.scheduled()
+    consultation_id = 0
+    for task in scheduled_tasks:
+        print(task)
+        # Retrieve the task, update the time or terminate it
+    user_id = instance.id
+    user_consultation = Consultation.objects.filter(user_id=user_id)
+    # There need to be guarantee that there is only one ongoing chat
+    if user_consultation:
+        if user_consultation.filter(status='open'):
+            print()
 
 
 class DepositTransaction(models.Model):
@@ -41,7 +61,7 @@ class Payment(models.Model):
 
     payer = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="payment_payer")
-    reciever = models.ForeignKey(
+    receiver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="payment_reciever")
     amount = models.DecimalField(max_digits=1000, decimal_places=2)
     service_type = models.CharField(
