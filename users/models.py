@@ -18,7 +18,6 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 load_dotenv()
-SECRET_KEY = os.getenv('JWT_SECRET')
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
 RAZORPAY_CONTACT_ENDPOINT = os.getenv('RAZORPAY_CONTACT_ENDPOINT')

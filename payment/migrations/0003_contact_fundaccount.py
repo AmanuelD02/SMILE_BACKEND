@@ -16,22 +16,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FundAccount',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('fund_account', models.CharField(max_length=255)),
                 ('entity', models.CharField(max_length=255)),
                 ('is_active', models.BooleanField()),
                 ('account_type', models.CharField(max_length=255)),
-                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_fund_account', to=settings.AUTH_USER_MODEL)),
+                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='user_fund_account', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='Contact',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('account_number', models.PositiveBigIntegerField(blank=True)),
                 ('contact_id', models.CharField(max_length=255)),
                 ('ifsc', models.CharField(blank=True, max_length=255)),
-                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contact_user', to=settings.AUTH_USER_MODEL)),
+                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='contact_user', to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]
