@@ -7,20 +7,21 @@ from users.models import User
 from .models import Appointment, AppointmentMessage
 from rest_framework.permissions import AllowAny
 
+from appointment.utils import get_appointment
+
 
 class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
 
-        # self.scope['url_route']['kwargs']['appointment_id']
-        appointment_id = 1
+        chat_id = self.scope['url_route']['kwargs']['appointment_id']
+        appointment = get_appointment(chat_id)
+
         self.room_name = f"appointment_thread_{appointment_id}"
         async_to_sync(self.channel_layer.group_add)(
             self.room_name, self.channel_name)
 
         self.accept()
-
-        # return super().websocket_connect(message)
 
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
