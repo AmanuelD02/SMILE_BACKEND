@@ -1,12 +1,23 @@
+from payment.models import Wallet
 import payment
+from django.contrib.gis.db import models
 from datetime import datetime
-from django.db import models
+
+# from django.db import models
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 import requests
 import os
 from dotenv import load_dotenv
+
+
+import sys
+
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 
 load_dotenv()
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
@@ -75,6 +86,8 @@ class User(AbstractUser):
     USERNAME_FIELD = 'phone_num'
     objects = CustomUserManager()
 
+    def __str__(self):
+        return self.full_name
 
 # @receiver(post_save, sender=User)
 # def create_contact_account(sender, instance, **kwargs):
@@ -128,8 +141,7 @@ class Dentist(models.Model):
 class Location(models.Model):
     id = models.OneToOneField(
         Dentist, on_delete=models.CASCADE, primary_key=True)
-    latitude = models.CharField(max_length=255)
-    longtiude = models.CharField(max_length=255)
+    location = models.PointField(srid=4326)
 
 
 class Address(models.Model):
@@ -149,3 +161,49 @@ class Link(models.Model):
     linkedin = models.CharField(max_length=255, blank=True)
     whatsapp = models.CharField(max_length=255, blank=True)
     telegram = models.CharField(max_length=255, blank=True)
+
+
+# @receiver(post_save, sender=User)
+# def create_contact_account(sender, instance, **kwargs):
+#     api_key = RAZORPAY_KEY_ID
+#     api_key_secret = RAZORPAY_KEY_SECRET
+#     request_url = RAZORPAY_CONTACT_ENDPOINT
+#     #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
+#     headers = {api_key: api_key_secret}
+
+#     user_id = instance.id
+#     full_name = instance.full_name
+#     contact = instance.phone_num
+
+#     body = {
+#         'name': full_name,
+#         'contact': contact
+#     }
+
+#     response = requests.post(request_url, headers=headers, data=body)
+#     if response.status_code == 200:
+#         response_data = response.json()
+#         contact_id = response_data['id']
+#         contact_account = payment.models.Contact.objects.create(
+#             user_id=user_id,
+#             contact_id=contact_id
+#         )
+
+
+@receiver(pre_save, sender=User)
+def hash_password(sender, instance, **kwargs):
+
+    if instance.id == None and instance.password != None:
+        instance.set_password(instance.password)
+
+
+@receiver(post_save, sender=User)
+def create_wallet(sender, instance, **kwargs):
+    wallet = Wallet.objects.filter(id=instance.id).first()
+    if wallet:
+        return
+
+    wallet = Wallet()
+    wallet.id = instance
+    wallet.balance = 0
+    wallet.save()

@@ -3,6 +3,7 @@ from django.db.models import fields
 from rest_framework import serializers
 from .models import Address, Location, User, Verification, Link, Dentist
 from fcm_django.models import FCMDevice
+from drf_extra_fields.geo_fields import PointField
 
 class OTPSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,9 +42,10 @@ class UserEditSerializer(serializers.Serializer):
 
 
 class LocationSerializer(serializers.ModelSerializer):
+    location = PointField()
     class Meta:
         model = Location
-        fields = ['id', 'latitude', 'longtiude']
+        fields = ['id', 'location']
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -94,4 +96,16 @@ class TopDentistSerializer(serializers.ModelSerializer):
         model= Dentist
         fields = '__all__'
         depth=2
+
+class NearByDentistSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model= Location
+        fields =['id',]
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
         
+        user = User.objects.get(pk=instance.id)
+
+        representation['info'] = SearchDentistSerializer(user).data
+        return representation

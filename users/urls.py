@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, SendOTPView, AuthenticateOTPView
+from .views import NearByDentistView, RegisterView, SendOTPView, AuthenticateOTPView
 from .views import AddressDetailView, AddressView, DentistDetailView, DentistView,\
     LinkView, LocationView, LocationDetailView, LinkDetailView, EditProfileView, \
         DentistAllInfoView, SearchDentistListView,TopDentistListView
@@ -26,4 +26,5 @@ urlpatterns = [
     path('dentist/all/<int:id>/',DentistAllInfoView.as_view()),
     path('dentist/search/',SearchDentistListView.as_view()),
     path('dentist/toprated/',TopDentistListView.as_view()),
+    path('dentist/nearby/',NearByDentistView.as_view()),
 ]

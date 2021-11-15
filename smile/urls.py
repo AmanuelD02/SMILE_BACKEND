@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-import debug_toolbar
+
 from django.contrib import admin
 from django.urls import path, include, re_path
 
@@ -43,7 +43,6 @@ urlpatterns = [
             schema_view.without_ui(cache_timeout=0), name='schema-json'),  # <-- Here
     path('doc/', schema_view.with_ui('swagger', cache_timeout=0),
          name='schema-swagger-ui'),
-    path('__debug__/', include(debug_toolbar.urls)),
     path('admin/', admin.site.urls),
     path('api/v1/user/', include('users.urls')),
     path('api/v1/follow/', include('follow.urls')),
@@ -51,7 +50,9 @@ urlpatterns = [
     path('api/v1/clinic/', include('clinic.urls')),
     path('api/v1/treatment/', include('treatment.urls')),
     path('api/v1/appointment/', include('appointment.urls')),
-    path('api/v1/consultation/', include('consultation.urls'))
+    path('api/v1/consultation/', include('consultation.urls')),
+    path('api/v1/payment/', include('payment.urls')),
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,3 +1,4 @@
+# from django.db.models import query
 from django.http.response import HttpResponseRedirect
 import jwt
 import os
@@ -22,13 +23,17 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework_swagger import renderers
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.measure import D
 
 from fcm_django.models import FCMDevice
 from users.models import Verification, User
 from .utils import Utils
 
 from .models import Address, Link, User, Dentist, Verification, Location
-from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, \
+from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, NearByDentistSerializer, \
 SearchDentistSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer,\
      UserEditSerializer, TopDentistSerializer
 
@@ -273,7 +278,7 @@ class LocationDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request):
+    def put(self, request,id):
         location = get_object_or_404(Location, pk=request.data['id'])
 
         serializer = LocationSerializer(location, data=request.data)
@@ -436,3 +441,31 @@ class TopDentistListView(ListAPIView):
     def get_queryset(self):
         queryset = Dentist.objects.order_by("-rating")
         return queryset
+
+
+
+# class NearByDentistView(ListAPIView):
+#     serializer_class = NearByDentistSerializer
+#     pagination_class = PageNumberPagination
+
+#     def get_queryset(self):
+#         longitude = float(self.request.query_params.get('longitude'))
+#         latitude  = float(self.request.query_params.get('latitude'))
+#         # user_location = GEOSGeometry(f"POINT({latitude} {longitude}",srid=4326)
+#         user_location = Point(latitude,longitude,srid=4326)
+#         queryset = Location.objects.annotate(distance=Distance('location',user_location)).order_by('distance')[0:6]
+            
+#         return queryset
+
+
+class NearByDentistView(APIView):
+    def get(self,request):
+        longitude = float(self.request.query_params.get('longitude'))
+        latitude  = float(self.request.query_params.get('latitude'))
+        user_location = Point(latitude,longitude,srid=4326)
+        queryset = Location.objects.filter(location__distance_lte=(user_location, D(km=100)))
+        print(queryset.first())
+
+        serializer = LocationSerializer(queryset,many=True)
+    
+        return Response(serializer.data)

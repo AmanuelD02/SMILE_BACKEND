@@ -45,3 +45,17 @@ class ConsultationMessage(models.Model):
 
     def previous_messages():
         return ConsultationMessage.objects.order_by('-created_at').all()
+
+
+
+class ConsultationTask(models.Model):
+    task_id = models.CharField(max_length=255)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    consultation_id = models.ForeignKey(Consultation,on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['task_id', 'user_id','consultation_id'], name='ConsultationTask')
+        ]
+
