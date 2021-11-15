@@ -6,20 +6,20 @@ from .models import Wallet, Contact, FundAccount, Payment
 
 class WalletSerializer(serializers.ModelSerializer):
     class Meta:
-        models = Wallet
+        model = Wallet
         fields = ['id', 'balance']
 
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
-        models = Contact
+        model = Contact
         fields = ['user_id', 'account_number', 'contact_id', 'ifsc']
         read_only_fields = ['user_id', 'contact_id']
 
 
 class FundAccountSerializer(serializers.ModelSerializer):
     class Meta:
-        models = FundAccount
+        model = FundAccount
         fields = ['user_id', 'fund_account',
                   'entity', 'is_active', 'account_type']
         read_only_fields = ['user_id', 'fund_account',
@@ -28,5 +28,5 @@ class FundAccountSerializer(serializers.ModelSerializer):
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
-        models = Payment
+        model = Payment
         fields = ['receiver', 'amount', 'service_type']

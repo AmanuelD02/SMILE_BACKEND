@@ -50,7 +50,9 @@ urlpatterns = [
     path('api/v1/clinic/', include('clinic.urls')),
     path('api/v1/treatment/', include('treatment.urls')),
     path('api/v1/appointment/', include('appointment.urls')),
-    path('api/v1/consultation/', include('consultation.urls'))
+    path('api/v1/consultation/', include('consultation.urls')),
+    path('api/v1/payment/', include('payment.urls')),
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

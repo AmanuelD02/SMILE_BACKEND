@@ -1,6 +1,8 @@
 import payment
+from django.contrib.gis.db import models
 from datetime import datetime
-from django.db import models
+
+# from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_save
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -87,6 +89,60 @@ class User(AbstractUser):
     def __str__(self):
         return self.full_name
 
+
+class Verification(models.Model):
+    phone_num = models.CharField(max_length=15, unique=True, primary_key=True)
+    code = models.IntegerField(null=False)
+    expiration_date = models.DateTimeField()
+    is_verified = models.BooleanField(default=False)
+
+
+class Dentist(models.Model):
+    id = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    clinic_name = models.CharField(max_length=255, blank=True)
+    degree = models.CharField(max_length=255, blank=True)
+    appointment_rate = models.FloatField()
+    consultation_rate = models.FloatField()
+    experience_year = models.PositiveIntegerField()
+    document_path = models.FileField(blank=True, upload_to=upload_to_document)
+    verified = models.BooleanField(default=False)
+    rating = models.PositiveSmallIntegerField(blank=True,default=0)
+    consultation_availabilty = models.BooleanField(default=False)
+
+
+
+class Location(models.Model):
+    id = models.OneToOneField(Dentist, on_delete=models.CASCADE, primary_key=True)
+    location = models.PointField(srid=4326)
+
+
+class Address(models.Model):
+    id = models.OneToOneField(
+        Dentist, on_delete=models.CASCADE, primary_key=True)
+    country = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=255, blank=True)
+    street = models.CharField(max_length=255, blank=True)
+
+
+class Link(models.Model):
+    id = models.OneToOneField(
+        Dentist, on_delete=models.CASCADE, primary_key=True)
+    facebook = models.CharField(max_length=255, blank=True)
+    twitter = models.CharField(max_length=255, blank=True)
+    linkedin = models.CharField(max_length=255, blank=True)
+    whatsapp = models.CharField(max_length=255, blank=True)
+    telegram = models.CharField(max_length=255, blank=True)
+
+
+
+
+
+
+
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
+from payment.models import Wallet
 # @receiver(post_save, sender=User)
 # def create_contact_account(sender, instance, **kwargs):
 #     api_key = RAZORPAY_KEY_ID
@@ -119,49 +175,16 @@ def hash_password(sender,instance, **kwargs):
     
     if instance.id ==None and instance.password !=None:
         instance.set_password(instance.password)
+
+
+@receiver(post_save,sender=User)
+def create_wallet(sender, instance, **kwargs):
+    wallet= Wallet.objects.filter(id=instance.id).first()
+    if wallet:
+        return 
+    
+    wallet = Wallet()
+    wallet.id = instance
+    wallet.balance = 0
+    wallet.save()
         
-class Verification(models.Model):
-    phone_num = models.CharField(max_length=15, unique=True, primary_key=True)
-    code = models.IntegerField(null=False)
-    expiration_date = models.DateTimeField()
-    is_verified = models.BooleanField(default=False)
-
-
-class Dentist(models.Model):
-    id = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    clinic_name = models.CharField(max_length=255, blank=True)
-    degree = models.CharField(max_length=255, blank=True)
-    appointment_rate = models.FloatField()
-    consultation_rate = models.FloatField()
-    experience_year = models.PositiveIntegerField()
-    document_path = models.FileField(blank=True, upload_to=upload_to_document)
-    verified = models.BooleanField(default=False)
-    rating = models.PositiveSmallIntegerField(blank=True,default=0)
-    consultation_availabilty = models.BooleanField(default=False)
-
-
-
-class Location(models.Model):
-    id = models.OneToOneField(
-        Dentist, on_delete=models.CASCADE, primary_key=True)
-    latitude = models.CharField(max_length=255)
-    longtiude = models.CharField(max_length=255)
-
-
-class Address(models.Model):
-    id = models.OneToOneField(
-        Dentist, on_delete=models.CASCADE, primary_key=True)
-    country = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=255, blank=True)
-    state = models.CharField(max_length=255, blank=True)
-    street = models.CharField(max_length=255, blank=True)
-
-
-class Link(models.Model):
-    id = models.OneToOneField(
-        Dentist, on_delete=models.CASCADE, primary_key=True)
-    facebook = models.CharField(max_length=255, blank=True)
-    twitter = models.CharField(max_length=255, blank=True)
-    linkedin = models.CharField(max_length=255, blank=True)
-    whatsapp = models.CharField(max_length=255, blank=True)
-    telegram = models.CharField(max_length=255, blank=True)

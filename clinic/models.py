@@ -1,5 +1,7 @@
-from django.db import models
+# from django.db import models
 from datetime import datetime
+from django.contrib.gis.db import models
+
 # Create your models here.
 
 
@@ -12,5 +14,5 @@ class Clinic(models.Model):
     profile_pic = models.ImageField(
         upload_to=upload_to, default='media\clinic_default.png')
     bio = models.TextField(blank=True)
-    latitude = models.CharField(blank=True, max_length=255)
-    longtitude = models.CharField(blank=True, max_length=255)
+    location = models.PointField(srid=4326,blank=True)
+
