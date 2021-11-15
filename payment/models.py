@@ -30,8 +30,9 @@ def check_ongoing_chat_before_withdrawal(sender, instance, **kwargs):
     i = celery.app.control.inspect()
     scheduled_tasks = i.scheduled()
     consultation_id = 0
-    for task in scheduled_tasks:
-        print(task)
+    if scheduled_tasks:
+        for task in scheduled_tasks:
+            print(task)
         # Retrieve the task, update the time or terminate it
     user_id = instance.id
     user_consultation = Consultation.objects.filter(user_id=user_id)

@@ -76,33 +76,33 @@ class User(AbstractUser):
     objects = CustomUserManager()
 
 
-@receiver(post_save, sender=User)
-def create_contact_account(sender, instance, **kwargs):
-    if payment.models.Contact.objects.filter(user_id=instance.id).first():
-        return
-    api_key = RAZORPAY_KEY_ID
-    api_key_secret = RAZORPAY_KEY_SECRET
-    request_url = RAZORPAY_CONTACT_ENDPOINT
-    #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
-    headers = {api_key: api_key_secret}
+# @receiver(post_save, sender=User)
+# def create_contact_account(sender, instance, **kwargs):
+#     if not instance.id is None:
+#         return
+#     api_key = RAZORPAY_KEY_ID
+#     api_key_secret = RAZORPAY_KEY_SECRET
+#     request_url = RAZORPAY_CONTACT_ENDPOINT
+#     #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
+#     headers = {api_key: api_key_secret}
 
-    user_id = instance.id
-    full_name = instance.full_name
-    contact = instance.phone_num
+#     user_id = instance.id
+#     full_name = instance.full_name
+#     contact = instance.phone_num
 
-    body = {
-        'name': full_name,
-        'contact': contact
-    }
+#     body = {
+#         'name': full_name,
+#         'contact': contact
+#     }
 
-    response = requests.post(request_url, headers=headers, body=body)
-    if response.status_code == 200:
-        response_data = response.json()
-        contact_id = response_data['id']
-        contact_account = payment.models.Contact.objects.create(
-            user_id=user_id,
-            contact_id=contact_id
-        )
+#     response = requests.post(request_url, headers=headers, body=body)
+#     if response.status_code == 200:
+#         response_data = response.json()
+#         contact_id = response_data['id']
+#         contact_account = payment.models.Contact.objects.create(
+#             user_id=user_id,
+#             contact_id=contact_id
+#         )
 
 
 class Verification(models.Model):
@@ -121,7 +121,7 @@ class Dentist(models.Model):
     experience_year = models.PositiveIntegerField()
     document_path = models.FileField(blank=True, upload_to=upload_to_document)
     verified = models.BooleanField(default=False)
-    rating = models.PositiveSmallIntegerField(blank=True,default=0)
+    rating = models.PositiveSmallIntegerField(blank=True, default=0)
     consultation_availabilty = models.BooleanField(default=False)
 
 

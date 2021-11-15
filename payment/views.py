@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from payment.serializers import WalletSerializer, ContactSerializer, PaymentSerializer
+from payment.serializers import WalletSerializer, ContactSerializer, PaymentSerializer, WithdrawBalanceSerializer
 
 from .models import Wallet, Contact
 # Create your views here.
@@ -65,3 +65,13 @@ class PerformPayment(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": "Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class WithdrawBalance(APIView):
+    def post(self, request):
+        JWT_authenticator = JWTAuthentication()
+        authentication = JWT_authenticator.authenticate(request)
+
+        if authentication is not None:
+            user, token = authentication
+            user_id = user.id

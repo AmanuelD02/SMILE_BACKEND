@@ -30,3 +30,10 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         models = Payment
         fields = ['receiver', 'amount', 'service_type']
+
+
+class WithdrawBalanceSerializer(serializer.ModelSerializer):
+    class Meta:
+        models = Wallet
+        fields = ['id', 'balance']
+        read_only_fields = ['id']
