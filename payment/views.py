@@ -17,20 +17,19 @@ from .models import Wallet, Contact
 
 class WalletView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         JWT_authenticator = JWTAuthentication()
         authentication = JWT_authenticator.authenticate(request)
         if authentication is not None:
             user, token = authentication
             user_id = user.id
-        
-
 
         wallet = get_object_or_404(Wallet, pk=user_id)
         serializer = WalletSerializer(wallet)
 
         return Response(serializer.data)
-    
+
     def put(self, request):
         """
         This method should be used for depositing to wallet and asummes the amount is valid amount
@@ -42,17 +41,18 @@ class WalletView(APIView):
             user, token = authentication
             user_id = user.id
 
-        wallet = get_object_or_404(Wallet,pk=user_id)
+        wallet = get_object_or_404(Wallet, pk=user_id)
         amount = request.data['amount']
-        
+
         wallet.balance += decimal.Decimal(amount)
         wallet.save()
         serializer = WalletSerializer(wallet)
 
-          ### SEND NOTIFICATION
-        FCMDevice.objects.filter(user_id = user_id).send_message(message=Message(notification=Notification(title="Transaction Completed", body=f'you have succesfully Deposited  {amount}')))
-                
-        ### SEND NOTIFICATION
+        # SEND NOTIFICATION
+        FCMDevice.objects.filter(user_id=user_id).send_message(message=Message(notification=Notification(
+            title="Transaction Completed", body=f'you have succesfully Deposited  {amount}')))
+
+        # SEND NOTIFICATION
         return Response(serializer.data)
 
 
@@ -70,7 +70,7 @@ class UpdateContact(APIView):
             user_id = user.id
 
             contact_account = get_object_or_404(Contact, pk=user_id)
-            serializer = ContactSerializer(data=request.data)
+            serializer = ContactSerializer(contact_account, data=request.data)
 
             if serializer.is_valid():
                 serializer.save()
@@ -99,8 +99,6 @@ class PerformPayment(APIView):
                 user_balance.balance -= amount
                 receiver_balance.balance += amount
                 serializer.save()
-
-              
 
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
