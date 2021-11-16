@@ -1,3 +1,4 @@
+from payment.models import Wallet
 import payment
 from datetime import datetime
 
@@ -16,7 +17,6 @@ import sys
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
 
 
 load_dotenv()
@@ -89,6 +89,34 @@ class User(AbstractUser):
     def __str__(self):
         return self.full_name
 
+# @receiver(post_save, sender=User)
+# def create_contact_account(sender, instance, **kwargs):
+#     if not instance.id is None:
+#         return
+#     api_key = RAZORPAY_KEY_ID
+#     api_key_secret = RAZORPAY_KEY_SECRET
+#     request_url = RAZORPAY_CONTACT_ENDPOINT
+#     #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
+#     headers = {api_key: api_key_secret}
+
+#     user_id = instance.id
+#     full_name = instance.full_name
+#     contact = instance.phone_num
+
+#     body = {
+#         'name': full_name,
+#         'contact': contact
+#     }
+
+#     response = requests.post(request_url, headers=headers, body=body)
+#     if response.status_code == 200:
+#         response_data = response.json()
+#         contact_id = response_data['id']
+#         contact_account = payment.models.Contact.objects.create(
+#             user_id=user_id,
+#             contact_id=contact_id
+#         )
+
 
 class Verification(models.Model):
     phone_num = models.CharField(max_length=15, unique=True, primary_key=True)
@@ -106,13 +134,13 @@ class Dentist(models.Model):
     experience_year = models.PositiveIntegerField()
     document_path = models.FileField(blank=True, upload_to=upload_to_document)
     verified = models.BooleanField(default=False)
-    rating = models.PositiveSmallIntegerField(blank=True,default=0)
+    rating = models.PositiveSmallIntegerField(blank=True, default=0)
     consultation_availabilty = models.BooleanField(default=False)
 
 
-
 class Location(models.Model):
-    id = models.OneToOneField(Dentist, on_delete=models.CASCADE, primary_key=True)
+    id = models.OneToOneField(
+        Dentist, on_delete=models.CASCADE, primary_key=True)
     location = models.PointField(srid=4326)
 
 
@@ -135,14 +163,6 @@ class Link(models.Model):
     telegram = models.CharField(max_length=255, blank=True)
 
 
-
-
-
-
-
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
-from payment.models import Wallet
 # @receiver(post_save, sender=User)
 # def create_contact_account(sender, instance, **kwargs):
 #     api_key = RAZORPAY_KEY_ID
@@ -171,20 +191,19 @@ from payment.models import Wallet
 
 
 @receiver(pre_save, sender=User)
-def hash_password(sender,instance, **kwargs):
-    
-    if instance.id ==None and instance.password !=None:
+def hash_password(sender, instance, **kwargs):
+
+    if instance.id == None and instance.password != None:
         instance.set_password(instance.password)
 
 
-@receiver(post_save,sender=User)
+@receiver(post_save, sender=User)
 def create_wallet(sender, instance, **kwargs):
-    wallet= Wallet.objects.filter(id=instance.id).first()
+    wallet = Wallet.objects.filter(id=instance.id).first()
     if wallet:
-        return 
-    
+        return
+
     wallet = Wallet()
     wallet.id = instance
     wallet.balance = 0
     wallet.save()
-        

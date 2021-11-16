@@ -12,7 +12,6 @@ from urllib.parse import parse_qs
 from jwt import decode as jwt_decode
 from django.conf import settings
 from consultation.middleware.chatControllMiddleware import ChatControllMiddleware
-from consultation.utils import get_consultation, verify_consultation_user, get_user
 
 from appointment.middleware.appointmentControllermiddleware import AppointmentChatMiddleware
 
@@ -25,6 +24,7 @@ class TokenAuthMiddleware(BaseMiddleware):
 
         # Appointment and Consultation Middlewares
         self.consultation_app = ChatControllMiddleware(inner)
+        self.appointment_app = AppointmentChatMiddleware(inner)
 
     async def __call__(self, scope, receive, send):
 
@@ -41,8 +41,27 @@ class TokenAuthMiddleware(BaseMiddleware):
         else:
             # validate token
             decoded_data = self.jwt_authenticator.get_validated_token(token)
-            # jwt_decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            scope["user"] = await get_user(decoded_token=decoded_data)
 
-        if scope["path"] == f"/{ChatControllMiddleware.consultation_ws_path}":
+            # jwt_decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            scope["user"] = await get_user(decoded_data)
+            print(scope["user"])
+            print(scope['path'])
+
+        if bool(re.match(ChatControllMiddleware.consultation_ws_path, scope["path"])):
+            print("COnsultation")
             return await self.consultation_app(scope, receive, send)
+        elif bool(re.match(AppointmentChatMiddleware.appointment_ws_path, scope["path"])):
+            print("appointment")
+            return await self.appointment_app(scope, receive, send)
+        else:
+            print("Unrecognized Path")
+
+
+@database_sync_to_async
+def get_user(decoded_token):
+
+    try:
+        # User.objects.get(id=decoded_token['id'])
+        return JWTAuthentication().get_user(decoded_token)
+    except User.DoesNotExist:
+        return None

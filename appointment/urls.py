@@ -24,7 +24,7 @@ urlpatterns = [
     path('patients/treated/', GetTreatedPatientsView.as_view()),
     path('patients/pending/', GetPendingPatientsView.as_view()),
     # path('patients/past/', GetPendingPatientsView.as_view())
-    # path('', views.index, name='index'),
+    #path('', views.index, name='index'),
     # path('<int:appointment_chat_id>/',
-    #      views.appointment_chat, name='appointment_chat')
+    #  views.appointment_chat, name='appointment_chat')
 ]

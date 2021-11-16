@@ -25,7 +25,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         # Receive the consultation id through the kwargs
-        chat_id = self.scope['url_route']['kwargs']['consultation_id']
+        chat_id = self.scope['url_route']['kwargs']['consultation_chat_id']
         consultation = get_consultation(chat_id)
         print(chat_id)
 
@@ -92,5 +92,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event['message']
         await self.send(text_data=json.dumps({
-            'message': message
+            "message": message
         }))
