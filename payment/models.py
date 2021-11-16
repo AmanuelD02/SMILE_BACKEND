@@ -2,7 +2,7 @@ from django.db import models
 from users.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_save
-from consultation.models import Consultation
+from consultation.models import Consultation, ConsultationTask
 import requests
 import os
 from dotenv import load_dotenv
