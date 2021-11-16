@@ -20,7 +20,6 @@ class PendingAppointmentSerializer(serializers.ModelSerializer):
                   'available_at',  'treatment_id']
         read_only_fields = ['id']
 
-
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment

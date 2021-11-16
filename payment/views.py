@@ -70,7 +70,7 @@ class UpdateContact(APIView):
             user_id = user.id
 
             contact_account = get_object_or_404(Contact, pk=user_id)
-            serializer = ContactSerializer(data=request.data)
+            serializer = ContactSerializer(contact_account,data=request.data)
 
             if serializer.is_valid():
                 serializer.save()

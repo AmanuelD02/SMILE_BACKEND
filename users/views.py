@@ -1,4 +1,5 @@
 # from django.db.models import query
+from django.db.models import query
 from django.http.response import HttpResponseRedirect
 import jwt
 import os
@@ -463,6 +464,12 @@ class NearByDentistView(APIView):
         longitude = float(self.request.query_params.get('longitude'))
         latitude  = float(self.request.query_params.get('latitude'))
         user_location = Point(latitude,longitude,srid=4326)
+        # min_lat = latitude - 0.009 # You have to calculate this offsets based on the user location.
+        # max_lat = latitude + 0.009 # Because the distance of one degree varies over the planet.
+        # min_lng = longitude - 0.009
+        # max_lng = longitude + 0.009
+        # queryset = Location.objects.annotate(distance=Distance('location',user_location)).order_by('distance')[0:6]
+        # queryset =  Location.objects.order_by(Location.location.distance_box(user_location))
         queryset = Location.objects.filter(location__distance_lte=(user_location, D(km=100)))
         print(queryset.first())
 
