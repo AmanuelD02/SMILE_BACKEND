@@ -1,12 +1,18 @@
-from datetime import datetime
+from datetime import datetime , timedelta
+from django.utils import timezone
 from django.db import models
-from users.models import User, Dentist
-from treatment.models import Treatment
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from notification.models import Notification as Notify
 from fcm_django.models import FCMDevice
 from firebase_admin.messaging import Message, Notification
+from payment.models import Wallet
+
+import decimal
+
+from users.models import User, Dentist
+from treatment.models import Treatment
+
 # Create your models here.
 
 
@@ -25,6 +31,20 @@ class PendingAppointment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+    def save(self, *args, **kwargs):
+        user = self.user_id
+        wallet = Wallet.objects.filter(id=user.id).first()
+        treatment = self.treatment_id
+        c =  wallet.balance - treatment.price 
+        zero = decimal.Decimal(0)
+        r =  c.compare(zero)
+
+        if c.compare(zero) ==1:
+            return super().save()
+        else:
+            return 
+
+
 class Appointment(models.Model):
     id = models.AutoField(primary_key=True)
     dentist_id = models.ForeignKey(Dentist, on_delete=models.CASCADE)
@@ -33,6 +53,22 @@ class Appointment(models.Model):
     treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        user = self.user_id
+        wallet = Wallet.objects.filter(id=user.id).first()
+        treatment = self.treatment_id
+        c =  wallet.balance - treatment.price 
+        zero = decimal.Decimal(0)
+        r =  c.compare(zero)
+
+        if c.compare(zero) ==1:
+            wallet.balance = c
+            wallet.save()
+            r = wallet.balance
+
+            return super().save()
+        else:
+            raise ValueError("Low Balance")
 
 class AppointmentChat(models.Model):
     PRE_APPOINTMENT = 'pre'
@@ -47,6 +83,8 @@ class AppointmentChat(models.Model):
     status = models.CharField(
         max_length=100, choices=STATUS, default=PRE_APPOINTMENT)
     expiration_date = models.DateTimeField()
+
+
 
 
 class AppointmentMessage(models.Model):
@@ -85,3 +123,17 @@ def delete_pending_appointments(sender, instance, **kwargs):
     appointment_date = instance.available_at
     pending = PendingAppointment.objects.filter(available_at=appointment_date)
     pending.delete()
+
+
+
+
+@receiver(post_save, sender=Appointment)
+def create_appointment_chat(sender, instance, **kwargs):
+    chat = AppointmentChat()
+    chat.user_id = instance.user_id
+    chat.dentist_id = instance.dentist_id
+    chat.appointment_id = instance
+    chat.created_at = timezone.now()
+    a = timezone.now() + timedelta(days=1)
+    chat.expiration_date =  timezone.now() + timedelta(days=1)
+    chat.save()

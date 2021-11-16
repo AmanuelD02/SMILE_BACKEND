@@ -201,7 +201,7 @@ SIMPLE_JWT = {
 }
 
 from firebase_admin import credentials
-path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+path = os.path.join(BASE_DIR,os.getenv('GOOGLE_APPLICATION_CREDENTIALS')) 
 print(path)
 cred = credentials.Certificate(path)
 FIREBASE_APP = initialize_app(cred)
