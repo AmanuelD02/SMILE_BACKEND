@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clinic',
             name='location',
-            field=django.contrib.gis.db.models.fields.PointField(default=django.utils.timezone.now, srid=4326),
+            field=django.contrib.gis.db.models.fields.PointField(srid=4326),
             preserve_default=False,
         ),
     ]

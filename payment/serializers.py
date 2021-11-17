@@ -32,7 +32,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ['receiver', 'amount', 'service_type']
 
 
-class WithdrawBalanceSerializer(serializer.ModelSerializer):
+class WithdrawBalanceSerializer(serializers.ModelSerializer):
     class Meta:
         models = Wallet
         fields = ['id', 'balance']
