@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+from firebase_admin import credentials
 import os
 from dotenv import load_dotenv
 
@@ -111,11 +112,14 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -183,7 +187,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
-## DEBUG -TOOLBAR
+# DEBUG -TOOLBAR
 INTERNAL_IPS = [
     # ...
     '127.0.0.1',
@@ -200,25 +204,24 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'access'
 }
 
-from firebase_admin import credentials
-path = os.path.join(BASE_DIR,os.getenv('GOOGLE_APPLICATION_CREDENTIALS')) 
+path = os.path.join(BASE_DIR, os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 print(path)
 cred = credentials.Certificate(path)
 FIREBASE_APP = initialize_app(cred)
 
 
 FCM_DJANGO_SETTINGS = {
-     # default: _('FCM Django')
+    # default: _('FCM Django')
     "APP_VERBOSE_NAME": "[string for AppConfig's verbose_name]",
-     # true if you want to have only one active device per registered user at a time
-     # default: False
+    # true if you want to have only one active device per registered user at a time
+    # default: False
     "ONE_DEVICE_PER_USER": True,
-     # devices to which notifications cannot be sent,
-     # are deleted upon receiving error response from FCM
-     # default: False
+    # devices to which notifications cannot be sent,
+    # are deleted upon receiving error response from FCM
+    # default: False
     "DELETE_INACTIVE_DEVICES": True,
     # Transform create of an existing Device (based on registration id) into
-                # an update. See the section
+    # an update. See the section
     # "Update of device with duplicate registration ID" for more details.
     "UPDATE_ON_DUPLICATE_REG_ID": True,
 }
@@ -241,9 +244,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles'), ]
 
 # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal304'
-GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, r'venv\Lib\site-packages\osgeo\gdal303.dll') 
+GDAL_LIBRARY_PATH = os.path.join(
+    BASE_DIR, r'venv\Lib\site-packages\osgeo\gdal303.dll')
 
 if os.name == 'nt':
     VENV_BASE = os.environ['VIRTUAL_ENV']
-    os.environ['PATH'] = os.path.join(VENV_BASE, 'Lib\\site-packages\\osgeo') + ';' + os.environ['PATH']
-    os.environ['PROJ_LIB'] = os.path.join(VENV_BASE, 'Lib\\site-packages\\osgeo\\data\\proj') + ';' + os.environ['PATH']
+    os.environ['PATH'] = os.path.join(
+        VENV_BASE, 'Lib\\site-packages\\osgeo') + ';' + os.environ['PATH']
+    os.environ['PROJ_LIB'] = os.path.join(
+        VENV_BASE, 'Lib\\site-packages\\osgeo\\data\\proj') + ';' + os.environ['PATH']
