@@ -112,12 +112,12 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.environ.get('POSTGRES_USERNAME'),
+        'USER': os.environ.get('POSTGRES_USERNAME'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'),
+        'PORT': os.environ.get('POSTGRES_PORT'),
     }
 }
 
@@ -243,13 +243,13 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles'), ]
 
-# GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal304'
-GDAL_LIBRARY_PATH = os.path.join(
-    BASE_DIR, r'venv\Lib\site-packages\osgeo\gdal303.dll')
+# # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal304'
+# GDAL_LIBRARY_PATH = os.path.join(
+#     BASE_DIR, r'venv\Lib\site-packages\osgeo\gdal303.dll')
 
-if os.name == 'nt':
-    VENV_BASE = os.environ['VIRTUAL_ENV']
-    os.environ['PATH'] = os.path.join(
-        VENV_BASE, 'Lib\\site-packages\\osgeo') + ';' + os.environ['PATH']
-    os.environ['PROJ_LIB'] = os.path.join(
-        VENV_BASE, 'Lib\\site-packages\\osgeo\\data\\proj') + ';' + os.environ['PATH']
+# if os.name == 'nt':
+#     VENV_BASE = os.environ['VIRTUAL_ENV']
+#     os.environ['PATH'] = os.path.join(
+#         VENV_BASE, 'Lib\\site-packages\\osgeo') + ';' + os.environ['PATH']
+#     os.environ['PROJ_LIB'] = os.path.join(
+#         VENV_BASE, 'Lib\\site-packages\\osgeo\\data\\proj') + ';' + os.environ['PATH']

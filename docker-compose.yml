@@ -1,12 +1,5 @@
 version: '3.9'
 services:
-  db:
-    image: postgres:10-alpine
-    restart: always
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
-    env_file:
-      - ".env"
   app:
     build: .
     restart: always
@@ -17,8 +10,6 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app
-    depends_on:
-      - db
   qgis:
     image: qgis/qgis:latest
   redis:
@@ -33,7 +24,6 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - db
       - redis
       - app
 

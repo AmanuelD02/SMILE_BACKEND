@@ -1,4 +1,4 @@
-from payment.models import Wallet
+
 import payment
 from datetime import datetime
 
@@ -199,6 +199,7 @@ def hash_password(sender, instance, **kwargs):
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, **kwargs):
+    from payment.models import Wallet
     wallet = Wallet.objects.filter(id=instance.id).first()
     if wallet:
         return
