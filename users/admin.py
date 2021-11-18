@@ -14,7 +14,7 @@ from .models import Address, Dentist, Link, Location, User, Verification
 # Register your models here.
 
 class UserAdminModel(admin.ModelAdmin):
-    list_display = ('full_name', 'phone_num','role')
+    list_display = ('phone_num','full_name', 'role')
     list_filter = ('role','date_of_birth')
     list_per_page = 25
     

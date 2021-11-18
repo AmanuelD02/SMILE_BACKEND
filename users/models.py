@@ -43,7 +43,8 @@ class CustomUserManager(BaseUserManager):
 
         user = self.model(phone_num=phone_num, **extra_fields)
         print(password)
-        # user.set_password(password)
+        user.set_password(password)
+        
         user.save(using=self._db)
         return user
 
@@ -81,8 +82,9 @@ class User(AbstractUser):
         upload_to=upload_to, default='media\default.png')
     # slug = models.SlugField(null=True)
     username = None
-    password = models.CharField(max_length=255,blank=True)
-
+    # password = models.CharField(max_length=255,blank=True)
+    first_name= None
+    last_name= None
     USERNAME_FIELD = 'phone_num'
     objects = CustomUserManager()
 
@@ -190,11 +192,11 @@ class Link(models.Model):
 #         )
 
 
-# @receiver(pre_save, sender=User)
-# def hash_password(sender, instance, **kwargs):
+@receiver(pre_save, sender=User)
+def hash_password(sender, instance, **kwargs):
 
-#     if instance.id == None and instance.password != None and instance.is_superuser==True:
-#         instance.set_password(instance.password)
+    if instance.id == None and instance.password != None and instance.is_superuser==False:
+        instance.set_password(instance.password)
 
 
 @receiver(post_save, sender=User)
