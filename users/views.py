@@ -470,7 +470,7 @@ class NearByDentistView(APIView):
         # max_lng = longitude + 0.009
         # queryset = Location.objects.annotate(distance=Distance('location',user_location)).order_by('distance')[0:6]
         # queryset =  Location.objects.order_by(Location.location.distance_box(user_location))
-        queryset = Location.objects.filter(location__distance_lte=(user_location, D(km=100)))
+        queryset = Location.objects.filter(location__distance_lte=(user_location, D(km=2)))
         print(queryset.first())
 
         serializer = LocationSerializer(queryset,many=True)
