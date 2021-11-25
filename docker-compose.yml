@@ -1,7 +1,6 @@
 version: '3.9'
 services:
-  qgis:
-    image: qgis/qgis:latest
+
   app:
     build: .
     restart: always
@@ -12,8 +11,6 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app
-    depends_on:
-      - qgis
 
   redis:
     image: redis:alpine
