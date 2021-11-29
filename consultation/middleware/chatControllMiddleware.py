@@ -59,4 +59,5 @@ class ChatControllMiddleware(BaseMiddleware):
             else:
                 raise rest_framework.exceptions.ValidationError(
                     "Invalid Consultation Information")
-        raise AuthError("Invalid User Information")
+        else:
+            raise AuthError("Invalid User Information")

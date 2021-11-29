@@ -1,3 +1,4 @@
+from celery.result import AsyncResult
 from django.db import models
 from users.models import User
 from django.dispatch import receiver

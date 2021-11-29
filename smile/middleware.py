@@ -48,10 +48,10 @@ class TokenAuthMiddleware(BaseMiddleware):
             print(scope['path'])
 
         if bool(re.match(ChatControllMiddleware.consultation_ws_path, scope["path"])):
-            print("COnsultation")
+            print("Routing to the Consultation Middleware")
             return await self.consultation_app(scope, receive, send)
         elif bool(re.match(AppointmentChatMiddleware.appointment_ws_path, scope["path"])):
-            print("appointment")
+            print("Routing to the Appointment Middleware")
             return await self.appointment_app(scope, receive, send)
         else:
             print("Unrecognized Path")

@@ -3,7 +3,7 @@ from .models import Consultation, ConsultationRequest
 from channels.db import database_sync_to_async
 from payment.models import Wallet
 from datetime import timedelta
-
+from django.utils import timezone
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -20,7 +20,10 @@ def get_user(decoded_token):
 @database_sync_to_async
 def get_consultation(consultation_id):
     try:
-        return Consultation.objects.get(id=consultation_id)
+        consultation = Consultation.objects.get(id=consultation_id)
+        if consultation.status == 'close':
+            return None
+        return consultation
     except Consultation.DoesNotExist:
         return None
 
@@ -48,8 +51,7 @@ def get_user_wallet(user_id):
 
 @database_sync_to_async
 def check_user_balance(wallet, consultation_id):
-    """Check the balance of the user in accordance to the doctor required rate
-    Returns how many more minutes the user can chat """
+    """Check the balance of the user in accordance to the doctor required rate"""
 
     try:
         consultation = Consultation.objects.get(id=consultation_id)
@@ -79,12 +81,18 @@ def trigger_welcome_message(consultation_id):
 
 
 def end_consultation_chat(consultation_id):
-    data = {
-        "type": "disconnect",
-        "message": "This Consultation Chat has been terminated",
-        "consultation_id": consultation_id
-    }
-    room_name = f'chat_{consultation_id}'
+    try:
+        consultation = Consultation.objects.get(id=consultation_id)
+        consultation.ending_time = timezone.now()
+        data = {
+            "type": "disconnect",
+            "message": "This Consultation Chat has been terminated",
+            "consultation_id": consultation_id
+        }
+        room_name = f'chat_{consultation_id}'
 
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.send)(room_name, data)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)(room_name, data)
+
+    except:
+        return None
