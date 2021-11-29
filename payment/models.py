@@ -23,24 +23,24 @@ class Wallet(models.Model):
     balance = models.DecimalField(max_digits=1000, decimal_places=2)
 
 
-@receiver(pre_save, sender=Wallet)
-def check_ongoing_chat_before_withdrawal(sender, instance, **kwargs):
+# @receiver(pre_save, sender=Wallet)
+# def check_ongoing_chat_before_withdrawal(sender, instance, **kwargs):
 
-    # Create the celery inspector to inspect all workers
-    i = celery.app.control.inspect()
-    scheduled_tasks = i.scheduled()
-    consultation_id = 0
-    if not scheduled_tasks:
-        return
-    for task in scheduled_tasks:
-        print(task)
-        # Retrieve the task, update the time or terminate it
-    user_id = instance.id
-    user_consultation = Consultation.objects.filter(user_id=user_id)
-    # There need to be guarantee that there is only one ongoing chat
-    if user_consultation:
-        if user_consultation.filter(status='open'):
-            print()
+#     # Create the celery inspector to inspect all workers
+#     i = celery.app.control.inspect()
+#     scheduled_tasks = i.scheduled()
+#     consultation_id = 0
+#     if not scheduled_tasks:
+#         return
+#     for task in scheduled_tasks:
+#         print(task)
+#         # Retrieve the task, update the time or terminate it
+#     user_id = instance.id
+#     user_consultation = Consultation.objects.filter(user_id=user_id)
+#     # There need to be guarantee that there is only one ongoing chat
+#     if user_consultation:
+#         if user_consultation.filter(status='open'):
+#             print()
 
 
 class DepositTransaction(models.Model):
