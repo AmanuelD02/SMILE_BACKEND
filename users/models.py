@@ -190,15 +190,15 @@ class Link(models.Model):
 #         )
 
 
-@receiver(pre_save, sender=User)
-def hash_password(sender, instance, **kwargs):
-    print("hash passd")
-    if instance.id == None and instance.password != None:
-        print("before hash: ")
-        print(instance.password)
-        instance.set_password(instance.password)
-        print("after hash")
-        print(instance.password)
+# @receiver(pre_save, sender=User)
+# def hash_password(sender, instance, **kwargs):
+#     print("hash passd")
+#     if instance.id == None and instance.password != None:
+#         print("before hash: ")
+#         print(instance.password)
+#         instance.set_password(instance.password)
+#         print("after hash")
+#         print(instance.password)
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, **kwargs):

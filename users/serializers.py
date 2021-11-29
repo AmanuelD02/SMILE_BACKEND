@@ -19,15 +19,15 @@ class UnauthorizedUserSerializer(serializers.Serializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        models = User
-        fields = '__all__'
+        model = User
+        fields = ('phone_num', 'full_name', 'profile_pic', 'role','bio','date_of_birth')
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    notification_id = serializers.CharField()
+    # notification_id = serializers.CharField()
     class Meta:
         model = User
-        fields = ('phone_num', 'full_name', 'profile_pic', 'role','notification_id','bio','date_of_birth')
+        fields = ('phone_num', 'full_name', 'profile_pic', 'role','bio','date_of_birth')
     # def create(self, validated_data):
     #     print("create method")
     #     print(validated_data)

@@ -37,7 +37,7 @@ from .utils import Utils
 from .models import Address, Link, User, Dentist, Verification, Location
 from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, NearByDentistSerializer, \
 SearchDentistSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer,\
-     UserEditSerializer, TopDentistSerializer
+     UserEditSerializer, TopDentistSerializer, UserCreateSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -77,9 +77,15 @@ class RegisterView(APIView):
             return Response({
                 "message": "Please Verify Your Phone Number First"
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if data.get('notification_id') is None or data.get('notification_id') =='':
+            return Response({
+                "message":"notification id required"
+            }, status= status.HTTP_400_BAD_REQUEST)
+
 
         print("before serializer")
-        serializer = UserRegisterSerializer(data=data)
+        serializer = UserCreateSerializer(data=data)
         print("after serializer")
 
         serializer.is_valid(raise_exception=True)
@@ -87,7 +93,8 @@ class RegisterView(APIView):
 
          
         valid_data = serializer.validated_data
-        notification_id = valid_data.pop('notification_id')
+        # notification_id = valid_data.pop('notification_id')
+        notification_id = data.get('notification_id')
         print("after poped \n")
         print(valid_data)
 
