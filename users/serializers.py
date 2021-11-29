@@ -17,15 +17,27 @@ class UnauthorizedUserSerializer(serializers.Serializer):
     registered = serializers.BooleanField()
 
 
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        models = User
+        fields = '__all__'
+
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     notification_id = serializers.CharField()
     class Meta:
         model = User
-        fields = ('phone_num', 'full_name', 'profile_pic', 'role','notification_id')
-    def create(self, validated_data):
-        notification = validated_data.pop('notification_id')
-        user = User.objects.create(**validated_data)
-        return user
+        fields = ('phone_num', 'full_name', 'profile_pic', 'role','notification_id','bio','date_of_birth')
+    # def create(self, validated_data):
+    #     print("create method")
+    #     print(validated_data)
+    #     notification = validated_data.pop('notification_id') 
+    #     print("validated and poped: \n")
+        
+    #     user = User.objects.create(**validated_data)
+    #     user.save()
+    #     print("create user object")
+    #     return user
 
 
 class UserSerializer(serializers.ModelSerializer):

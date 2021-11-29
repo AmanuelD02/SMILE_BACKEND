@@ -192,15 +192,19 @@ class Link(models.Model):
 
 @receiver(pre_save, sender=User)
 def hash_password(sender, instance, **kwargs):
-
+    print("hash passd")
     if instance.id == None and instance.password != None:
+        print("before hash: ")
+        print(instance.password)
         instance.set_password(instance.password)
-
+        print("after hash")
+        print(instance.password)
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, **kwargs):
     from payment.models import Wallet
     wallet = Wallet.objects.filter(id=instance.id).first()
+    print("wallet post save")
     if wallet:
         return
 
@@ -208,3 +212,4 @@ def create_wallet(sender, instance, **kwargs):
     wallet.id = instance
     wallet.balance = 0
     wallet.save()
+    print("wallet saved")
