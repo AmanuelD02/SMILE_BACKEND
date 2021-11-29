@@ -1,3 +1,4 @@
+from celery.result import AsyncResult
 from django.db import models
 from users.models import User
 from django.dispatch import receiver
@@ -29,18 +30,19 @@ def check_ongoing_chat_before_withdrawal(sender, instance, **kwargs):
     # Create the celery inspector to inspect all workers
     i = celery.app.control.inspect()
     scheduled_tasks = i.scheduled()
-    consultation_id = 0
+    consultation = Consultation.objects.filter(user_id=instance.id)
+    consultation_id = None
+    if consultation:
+        consultation_id = consultation.filter(status='open').first()
     if not scheduled_tasks:
         return
-    for task in scheduled_tasks:
-        print(task)
+    if consultation_id:
+        user_chat_task = ConsultationTask.objects.filter(
+            consultation_id=consultation_id).first()
+        user_chat_task_id = user_chat_task.task_id
+
+        task = AsyncResult(user_chat_task_id, app=celery.app)
         # Retrieve the task, update the time or terminate it
-    user_id = instance.id
-    user_consultation = Consultation.objects.filter(user_id=user_id)
-    # There need to be guarantee that there is only one ongoing chat
-    if user_consultation:
-        if user_consultation.filter(status='open'):
-            print()
 
 
 class DepositTransaction(models.Model):

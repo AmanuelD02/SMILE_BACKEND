@@ -10,7 +10,10 @@ from channels.layers import get_channel_layer
 @database_sync_to_async
 def get_appointment(appointment_id):
     try:
-        return Appointment.objects.get(id=appointment_id)
+        appointment = Appointment.objects.get(id=appointment_id)
+        if appointment.status == 'close':
+            return None
+        return appointment
     except Appointment.DoesNotExist:
         return None
 
