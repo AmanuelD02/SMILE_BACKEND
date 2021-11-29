@@ -1,26 +1,29 @@
 version: '3.9'
 services:
-  db:
-    image: postgres:10-alpine
-    restart: always
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
-    env_file:
-      - ".env"
+
   app:
     build: .
-    restart: always
+    restart: on-failure
     env_file:
       - ".env"
-    command: python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - .:/app
     depends_on:
-      - db
-  qgis:
-    image: qgis/qgis:latest
+      - postgres-db
+  postgres-db:
+      image: kartoza/postgis:12.0
+      ports:
+         - 5432:5432
+      volumes:
+         - postgres_data:/var/lib/postgresql
+      environment:
+         - POSTGRES_USER=${POSTGRES_USER}
+         - POSTGRES_PASS=${POSTGRES_PASS}
+         - POSTGRES_DBNAME=${POSTGRES_DBNAME}
+      restart: "on-failure"
   redis:
     image: redis:alpine
   celery:
@@ -29,17 +32,18 @@ services:
       context: .
     command: celery -A smile worker -l info
     volumes:
-      - ./app:/app
+      - .:/app
     env_file:
       - ./.env
     depends_on:
-      - db
       - redis
       - app
 
   celery-beat:
     build: .
     restart: always
+    env_file:
+      - ./.env
     command: celery -A smile beat -l info
     volumes:
       - ./celerydata/beat/:/usr/src/app/
@@ -50,3 +54,7 @@ services:
     depends_on:
       - redis
       - celery
+
+
+volumes:
+   postgres_data:
