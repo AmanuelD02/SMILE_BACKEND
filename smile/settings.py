@@ -101,7 +101,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)]
+            'hosts': [('redis', 6379)]
         }
     }
 
@@ -229,12 +229,12 @@ FCM_DJANGO_SETTINGS = {
 
 # Celery settings
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = 'redis://redis:6379'
 
 #: Only add pickle to this list if your broker is secured
 #: from unwanted access (see userguide/security.html)
 CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
