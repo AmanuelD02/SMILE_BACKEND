@@ -23,37 +23,39 @@ class ChatControllMiddleware(BaseMiddleware):
         close_old_connections()
         user = scope["user"]
         print(scope)
-        # scope['url_route']['kwargs']['consultation_chat_id']
-        chat_id = "43184bc9891e48e7b0ee7f992ddebd83"
+        # "43184bc9891e48e7b0ee7f992ddebd83"
+        chat_id = scope['url_route']['kwargs']['consultation_chat_id']
         user_id = user.id
         consultation = get_consultation(chat_id)
 
         AuthError = rest_framework.exceptions.AuthenticationFailed
         if user:
             if consultation:
+                ending_time = consultation.ending_time
                 if verify_consultation_user(consultation, user):
-                    wallet = get_user_wallet(user_id)
-                    if wallet:
-                        consultation_id = chat_id  # scope["consultation_id"]
-                        time_capacity = await check_user_balance(
-                            wallet, consultation_id)
+                    consultation_id = chat_id
+                    # wallet = get_user_wallet(user_id)
+                    # if wallet:
+                    #     consultation_id = chat_id  # scope["consultation_id"]
+                    #     time_capacity = await check_user_balance(
+                    #         wallet, consultation_id)
 
-                        if time_capacity:
+                    # if time_capacity:
 
-                            stop_eta = datetime.now() + time_capacity  # datetime(2021, 11, 15)
-                            terminate_consultation_chat.apply_async(
-                                args=[consultation_id], eta=stop_eta)
-                            return await self.inner(scope, receive, send)
+                    # stop_eta = datetime.now() + time_capacity  # datetime(2021, 11, 15)
+                    terminate_consultation_chat.apply_async(
+                        args=[consultation_id], eta=ending_time)
+                    return await self.inner(scope, receive, send)
 
-                        else:
-                            raise ValidationError(
-                                "Balance is not enough to start Consultation."
-                            )
+                    # else:
+                    #     raise ValidationError(
+                    #         "Balance is not enough to start Consultation."
+                    #     )
 
-                    else:
-                        raise ValidationError(
-                            "Invalid Wallet Information"
-                        )
+                    # else:
+                    #     raise ValidationError(
+                    #         "Invalid Wallet Information"
+                    #     )
                 else:
                     raise AuthError("Unauthorized Access")
             else:

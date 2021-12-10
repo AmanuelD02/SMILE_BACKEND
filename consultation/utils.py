@@ -31,12 +31,14 @@ def get_consultation(consultation_id):
 @database_sync_to_async
 def verify_consultation_user(consultation, user):
     """Verifies if a user belongs to a chat """
-    """Make Sure to give the function non-null data"""
-
-    if consultation.user_id == user.id or consultation.dentist_id == user.id:
-        return True
-    else:
-        return False
+    if consultation:
+        if consultation.user_id == user.id or consultation.dentist_id == user.id:
+            if consultation.status == 'o':
+                return True
+            else:
+                return False
+        else:
+            return False
 
 
 @database_sync_to_async
