@@ -1,7 +1,7 @@
 from users.models import Dentist, User
 from appointment.models import Appointment
 from channels.db import database_sync_to_async
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -21,12 +21,15 @@ def get_appointment(appointment_id):
 @database_sync_to_async
 def verify_appointment_user(appointment, user):
     """Verifies if a user belongs to a chat """
-    """Make Sure to give the function non-null data"""
 
-    if appointment.user_id == user.id or appointment.dentist_id == user.id:
-        return True
-    else:
-        return False
+    if appointment:
+        if appointment.user_id == user.id or appointment.dentist_id == user.id:
+            if appointment.expiration_date > datetime.now():
+                return True
+            else:
+                return False
+        else:
+            return False
 
 
 def end_appointment_chat(appointment_id):
