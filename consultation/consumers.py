@@ -27,7 +27,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Receive the consultation id through the kwargs
         chat_id = self.scope['url_route']['kwargs']['consultation_chat_id']
         consultation = get_consultation(chat_id)
-        print(chat_id)
 
         user = self.scope.get('user', False)
 
@@ -78,7 +77,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print(text_data)
         message = text_data_json['message']
 
         await self.channel_layer.group_send(

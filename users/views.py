@@ -1,4 +1,5 @@
 # from django.db.models import query
+from django import http
 from django.db.models import query
 from django.http.response import HttpResponseRedirect
 import jwt
@@ -14,7 +15,7 @@ from dotenv import load_dotenv
 from twilio.rest import Client
 
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -36,7 +37,7 @@ from .utils import Utils
 from .models import Address, Link, User, Dentist, Verification, Location
 from .serializers import AddressSerializer, AllInformationSerializer, LinkSerializer, LocationSerializer, NearByDentistSerializer, \
 SearchDentistSerializer, UserSerializer, DentistSerializer, UserRegisterSerializer, UnauthorizedUserSerializer,\
-     UserEditSerializer, TopDentistSerializer
+     UserEditSerializer, TopDentistSerializer, UserCreateSerializer
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -54,50 +55,83 @@ class RegisterView(APIView):
 
     def post(self, request, format=None):
         data = request.data.dict()
+        print(data)
         phone_num = data['phone_num']
-        notification_id = data['notification_id']
+        
         # del data['notification_id']
-        if User.objects.filter(phone_num=phone_num).first():
+        user = User.objects.filter(phone_num=phone_num).first()
+        if user:
             return Response({"message": "Phone Number already used, please use a different one."},
                             status=status.HTTP_409_CONFLICT)
-        serializer = UserRegisterSerializer(data=data)
+        
+        
+        verification = Verification.objects.filter(phone_num= phone_num).first()
+        print("verificatio")
+        print(verification)
+        if verification ==None:
+            return Response({
+                "message": "Please Verify Your Phone Number First"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        elif not verification.is_verified:
+            return Response({
+                "message": "Please Verify Your Phone Number First"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if data.get('notification_id') is None or data.get('notification_id') =='':
+            return Response({
+                "message":"notification id required"
+            }, status= status.HTTP_400_BAD_REQUEST)
+
+
+        print("before serializer")
+        serializer = UserCreateSerializer(data=data)
+        print("after serializer")
 
         serializer.is_valid(raise_exception=True)
+        print("after serializer validation")
+
+         
+        valid_data = serializer.validated_data
+        # notification_id = valid_data.pop('notification_id')
+        notification_id = data.get('notification_id')
+        print("after poped \n")
+        print(valid_data)
+
+
+        serializer.save()
+
+        print("after saving user    ")
+
+        # serializer.save()
+        print("SAVED")
+        user = User.objects.filter(phone_num=phone_num).first()
+        print(user)
+        notification = FCMDevice()
+        print("notification")
+        notification.registration_id= notification_id
+        notification.active = True
+        notification.user= user
+        notification.name = user.full_name
+
+        print("notification -end ")
+        notification.clean()
+
+        print("notification - clean")
+        notification.save()
+        print("notification - save")
+        user_serializer = UserSerializer(user)
+        print("user_serializer")
+        token = Utils.encode_token(user)
+
+        # Delete the verification information from the verification table
+        Verification.objects.filter(phone_num=phone_num).delete()
+
+        return Response({"data": user_serializer.data, "token": token}, status=status.HTTP_201_CREATED)
+
+
+    
       
-        if serializer.is_valid():
-
-            try:
-                verification = Verification.objects.get(
-                    phone_num=phone_num)
-                if verification == None:
-                    raise Verification.DoesNotExist
-
-                serializer.save()
-                user = User.objects.get(phone_num=phone_num)
-                notification = FCMDevice()
-                notification.registration_id= notification_id
-                notification.active = True
-                notification.user= user
-                notification.name = user.full_name
-
-                notification.clean()
-                notification.save()
-                user_serializer = UserSerializer(user)
-                token = Utils.encode_token(user)
-
-                # Delete the verification information from the verification table
-                Verification.objects.filter(phone_num=phone_num).delete()
-
-                return Response({"data": user_serializer.data, "token": token}, status=status.HTTP_201_CREATED)
-            except Verification.DoesNotExist:
-                return Response({
-                    "message": "Please Verify Your Phone Number First"
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            return Response({
-                "message": "Unsupported Data Type"
-            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -184,6 +218,7 @@ class AuthenticateOTPView(APIView):
                     response = {"data": user_serializer.data,
                                 "token": token, "registered": True}
                     notification = FCMDevice.objects.filter(user=user).first()
+                    print(notification)
 
                     notification.registration_id = notification_id
                     notification.clean()
@@ -470,7 +505,7 @@ class NearByDentistView(APIView):
         # max_lng = longitude + 0.009
         # queryset = Location.objects.annotate(distance=Distance('location',user_location)).order_by('distance')[0:6]
         # queryset =  Location.objects.order_by(Location.location.distance_box(user_location))
-        queryset = Location.objects.filter(location__distance_lte=(user_location, D(km=100)))
+        queryset = Location.objects.filter(location__distance_lte=(user_location, D(km=2)))
         print(queryset.first())
 
         serializer = LocationSerializer(queryset,many=True)

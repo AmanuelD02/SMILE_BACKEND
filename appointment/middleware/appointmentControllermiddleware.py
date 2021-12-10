@@ -23,13 +23,21 @@ class AppointmentChatMiddleware(BaseMiddleware):
         user_id = user.id
         chat_id = scope['url_route']['kwargs']['appointment_chat_id']
         appointment = get_appointment(chat_id)
-        expiration_date = appointment.expiration_date
 
+        AuthError = rest_framework.exceptions.AuthenticationFailed
         if user:
             if appointment:
+                expiration_date = appointment.expiration_date
                 if verify_appointment_user:
                     appointment_id = chat_id
                     terminate_appointment_chat.apply_async(
                         args=[appointment_id], eta=expiration_date
                     )
                     return await super.__call__(scope, receive, send)
+                else:
+                    raise AuthError("Unauthorized Access")
+            else:
+                raise rest_framework.exceptions.ValidationError(
+                    "Invalid Appointment Information")
+        else:
+            raise AuthError("Invalid User Information")

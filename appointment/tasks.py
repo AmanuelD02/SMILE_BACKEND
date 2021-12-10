@@ -7,6 +7,7 @@ from appointment.utils import end_appointment_chat
 
 @shared_task
 def delete_expired_availablity_and_pending_appointment():
+    print("DELETE Expired ")
     available = Availability.objects.filter(available_at__lt=datetime.now())
     available.delete()
 

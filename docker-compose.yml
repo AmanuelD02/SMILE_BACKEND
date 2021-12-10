@@ -1,0 +1,62 @@
+version: '3.9'
+services:
+
+  app:
+    build: .
+    restart: on-failure
+    env_file:
+      - ".env"
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres-db
+  postgres-db:
+      image: kartoza/postgis:12.0
+      ports:
+         - 5432:5432
+      volumes:
+         - postgres_data:/var/lib/postgresql
+      environment:
+         - POSTGRES_USER=${POSTGRES_USER}
+         - POSTGRES_PASS=${POSTGRES_PASS}
+         - POSTGRES_DBNAME=${POSTGRES_DBNAME}
+      restart: "on-failure"
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A smile worker -l info
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+      - app
+
+  celery-beat:
+    build: .
+    restart: always
+    env_file:
+      - ./.env
+    command: celery -A smile beat -l info
+    volumes:
+      - ./celerydata/beat/:/usr/src/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dbaa1_i7%*3r9-=z-+_mz4r-!qeed@(-a_r(g@k8jo8y3r27%m
+      - DJANGO_ALLOWED_HOSTS=db 127.0.0.1 [::1]
+    depends_on:
+      - redis
+      - celery
+
+
+volumes:
+   postgres_data:

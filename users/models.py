@@ -43,19 +43,30 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('The given phone_num must be set')
 
         user = self.model(phone_num=phone_num, **extra_fields)
+        print(password)
+        print("_create")
         user.set_password(password)
+
+        print(user.password)
+
         user.save(using=self._db)
+        print("_create saved")
         return user
 
     def create_user(self, phone_num, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
+        print("CREATE USER")
+        print(password)
+        print(phone_num)
+        
         return self._create_user(phone_num, password, **extra_fields)
 
     def create_superuser(self, phone_num, password=None, **extra_fields):
         """Create and save a SuperUser with the given phone_num and password."""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        print("create superuser")
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -204,19 +215,28 @@ class Link(models.Model):
 
 @receiver(pre_save, sender=User)
 def hash_password(sender, instance, **kwargs):
-
-    if instance.id == None and instance.password != None:
+    print("hash : ")
+    print(instance.password)
+    if instance.id == None and instance.password != None and instance.is_superuser==False and instance.is_staff == True:
+        print("hashing ...")
         instance.set_password(instance.password)
+        print("hashed")
 
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, **kwargs):
     from payment.models import Wallet
     wallet = Wallet.objects.filter(id=instance.id).first()
+    print("wallet post save")
+    print(wallet)
     if wallet:
         return
 
     wallet = Wallet()
+    print("wallet instance")
     wallet.id = instance
     wallet.balance = 0
+    print("wallet before savve")
     wallet.save()
+    print("wallet saved")
+    return 
