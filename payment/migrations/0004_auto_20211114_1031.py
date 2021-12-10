@@ -10,11 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='payment',
-            old_name='reciever',
-            new_name='receiver',
-        ),
+
         migrations.AlterField(
             model_name='contact',
             name='account_number',

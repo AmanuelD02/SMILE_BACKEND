@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import fields
 from rest_framework import serializers
-from .models import Wallet, Contact, FundAccount, Payment
+from .models import BankInfo, CardInfo, Wallet, Contact, FundAccount, Payment
 
 
 class WalletSerializer(serializers.ModelSerializer):
@@ -21,9 +21,7 @@ class FundAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = FundAccount
         fields = ['user_id', 'fund_account',
-                  'entity', 'is_active', 'account_type']
-        read_only_fields = ['user_id', 'fund_account',
-                            'entity', 'is_active', 'account_type']
+                  'account_type']
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -32,8 +30,19 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ['receiver', 'amount', 'service_type']
 
 
-class WithdrawBalanceSerializer(serializer.ModelSerializer):
+class WithdrawBalanceSerializer(serializers.ModelSerializer):
     class Meta:
-        models = Wallet
+        model = Wallet
         fields = ['id', 'balance']
         read_only_fields = ['id']
+
+class BankInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankInfo
+        fields = '__all__'
+
+
+class CardInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CardInfo
+        fields = '__all__'

@@ -1,4 +1,4 @@
-from payment.models import Wallet
+
 import payment
 from datetime import datetime
 
@@ -89,33 +89,45 @@ class User(AbstractUser):
     def __str__(self):
         return self.full_name
 
-# @receiver(post_save, sender=User)
-# def create_contact_account(sender, instance, **kwargs):
-#     if not instance.id is None:
-#         return
-#     api_key = RAZORPAY_KEY_ID
-#     api_key_secret = RAZORPAY_KEY_SECRET
-#     request_url = RAZORPAY_CONTACT_ENDPOINT
-#     #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
-#     headers = {api_key: api_key_secret}
 
-#     user_id = instance.id
-#     full_name = instance.full_name
-#     contact = instance.phone_num
 
-#     body = {
-#         'name': full_name,
-#         'contact': contact
-#     }
+@receiver(post_save, sender=User)
+def create_contact_account(sender, instance, **kwargs):
+    
+    from payment.models import Contact
 
-#     response = requests.post(request_url, headers=headers, body=body)
-#     if response.status_code == 200:
-#         response_data = response.json()
-#         contact_id = response_data['id']
-#         contact_account = payment.models.Contact.objects.create(
-#             user_id=user_id,
-#             contact_id=contact_id
-#         )
+    contact = Contact.objects.filter(user_id = instance.id).first()
+ 
+    if contact:
+        return 
+    
+    api_key = RAZORPAY_KEY_ID
+    api_key_secret = RAZORPAY_KEY_SECRET
+    request_url = RAZORPAY_CONTACT_ENDPOINT
+    #headers = {'x-api-key': api_key, 'x-api-secret': api_key_secret}
+    headers = {api_key: api_key_secret}
+
+    user_id = instance.id
+    full_name = instance.full_name
+    contact = instance.phone_num
+
+    body = {
+        'name': full_name,
+        'contact': contact
+    }
+
+    response = requests.post(request_url, data=body, auth= (api_key, api_key_secret))
+    print(response.json())
+    if response.status_code == 200:
+        response_data = response.json()
+        contact_id = response_data['id']
+
+        contact = Contact()
+        contact.user_id = instance
+        contact.contact_id = contact_id
+
+        contact.save()
+
 
 
 class Verification(models.Model):
@@ -199,6 +211,7 @@ def hash_password(sender, instance, **kwargs):
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, **kwargs):
+    from payment.models import Wallet
     wallet = Wallet.objects.filter(id=instance.id).first()
     if wallet:
         return

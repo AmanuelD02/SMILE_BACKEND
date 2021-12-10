@@ -75,68 +75,90 @@ class Contact(models.Model):
 
     user_id = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="contact_user")
-    account_number = models.PositiveBigIntegerField(null=True, blank=True)
     contact_id = models.CharField(max_length=255)
-    ifsc = models.CharField(blank=True, null=True, max_length=255)
+    
 
 
 class FundAccount(models.Model):
     user_id = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="user_fund_account")
     fund_account = models.CharField(max_length=255)
-    entity = models.CharField(max_length=255)
-    is_active = models.BooleanField()
     account_type = models.CharField(max_length=255)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user_id', 'account_type'], name='FundAccount')
+        ]
 
 
-@receiver(post_save, sender=Contact)
-def create_fund_account(sender, instance, **kwargs):
-    """Function is called everytime a Contact is saved or updated. It checks whether the fund account already exists,
-    and whether the updated Contact instance has the account_number and ifsc fields to save the new fund account"""
+class BankInfo(models.Model):
 
-    # Check if the Fund Account already exists
-    if FundAccount.objects.filter(user_id=instance.user_id).first():
-        return
-    # Check if the new Contact has account_number and ifsc
-    if not instance.ifsc and not instance.account_number:
-        return
-    api_key = RAZORPAY_KEY_ID
-    api_key_secret = RAZORPAY_KEY_SECRET
-    request_url = RAZORPAY_CONTACT_ENDPOINT
-    headers = {api_key: api_key_secret}
+    id =models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    account_number = models.CharField(max_length=255)
+    ifsc = models.CharField(max_length=255)
 
-    full_name = ""
-    user = User.objects.filter(id=instance.user_id).first()
-    if user:
-        full_name = user.full_name
 
-    contact_id = instance.contact_id
-    account_type = RAZORPAY_FUND_ACCOUNTS_BANK_ACCOUNT
-    ifsc = instance.ifsc
-    account_number = instance.account_number
 
-    body = {
-        "contact_id": contact_id,
-        "account_type": account_type,
-        "bank_account": {
-            "name": full_name,
-            "ifsc": ifsc,
-            "account_number": account_number
-        }
-    }
+class CardInfo(models.Model):
+    id = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    card_num =  models.CharField(max_length=255)
 
-    response = requests.post(request_url, headers=headers, body=body)
-    if response.status_code == 200:
-        response_data = response.json()
-        fund_account_id = response_data['id']
-        entity = response_data['entity']
-        is_active = response_data['is_active']
-        account_type = response_data['account_type']
 
-        fund_account = FundAccount.objects.create(
-            user_id=instance.user_id,
-            fund_account=fund_account_id,
-            entity=entity,
-            is_active=is_active,
-            account_type=account_type
-        )
+
+
+
+
+# @receiver(post_save, sender=Contact)
+# def create_fund_account(sender, instance, **kwargs):
+#     """Function is called everytime a Contact is saved or updated. It checks whether the fund account already exists,
+#     and whether the updated Contact instance has the account_number and ifsc fields to save the new fund account"""
+
+    
+#     # Check if the Fund Account already exists
+#     if FundAccount.objects.filter(user_id=instance.user_id).first():
+#         return
+#     # Check if the new Contact has account_number and ifsc
+#     if not instance.ifsc and not instance.account_number:
+#         return
+#     api_key = RAZORPAY_KEY_ID
+#     api_key_secret = RAZORPAY_KEY_SECRET
+#     request_url = RAZORPAY_CONTACT_ENDPOINT
+#     headers = {api_key: api_key_secret}
+
+#     full_name = ""
+#     print(instance.user_id)
+#     user = User.objects.filter(id=instance.user_id.id).first()
+#     if user:
+#         full_name = user.full_name
+
+#     contact_id = instance.contact_id
+#     account_type = RAZORPAY_FUND_ACCOUNTS_BANK_ACCOUNT
+#     ifsc = instance.ifsc
+#     account_number = instance.account_number
+
+#     body = {
+#         "contact_id": contact_id,
+#         "account_type": 'bank_account',
+#         "bank_account": {
+#             "name": full_name,
+#             "ifsc": ifsc,
+#             "account_number": account_number
+#         }
+#     }
+
+#     response = requests.post(request_url, auth=(api_key, api_key_secret), data=body)
+#     print(response.json())
+#     if response.status_code == 200:
+#         response_data = response.json()
+#         fund_account_id = response_data['id']
+#         entity = response_data['entity']
+#         is_active = response_data['is_active']
+#         account_type = response_data['account_type']
+
+#         fund_account = FundAccount.objects.create(
+#             user_id=instance,
+#             fund_account=fund_account_id,
+#             entity=entity,
+#             is_active=is_active,
+#             account_type=account_type
+#         )

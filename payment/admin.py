@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from payment.models import Wallet
+from payment.models import Contact, Wallet, FundAccount, BankInfo, CardInfo
 from users.models import User
 from django.db.models import Q
 # Register your models here.
@@ -27,3 +27,7 @@ class WalletAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Wallet, WalletAdmin)
+admin.site.register(Contact)
+admin.site.register(FundAccount)
+admin.site.register(BankInfo)
+admin.site.register(CardInfo)
