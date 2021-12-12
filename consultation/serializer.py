@@ -7,7 +7,7 @@ from users.models import Dentist, User
 class PendingConsultationSerializer(serializers.ModelSerializer):
     class Meta:
         model = PendingConsultation
-        fields = ['id', 'dentist_id', 'user_id']
+        fields = ['id', 'dentist_id', 'user_id','duration']
         read_only_fields = ['id']
 
 
@@ -24,3 +24,6 @@ class ConsultationSerializer(serializers.ModelSerializer):
         model = Consultation
         fields = ['id', 'dentist_id', 'user_id',
                   'status', 'starting_time', 'ending_time']
+        
+        read_only_fields = ['id','status','starting_time','ending_time']
+

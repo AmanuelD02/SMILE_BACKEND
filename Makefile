@@ -21,7 +21,7 @@ makemigrations:
 
 
 superuser:
-	docker-compose exec app manage.py createsuperuser
+	docker-compose exec app python manage.py createsuperuser
 
 volume:
 	docker volume inspect smile_backend-src_postgres_data 

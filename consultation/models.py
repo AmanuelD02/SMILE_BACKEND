@@ -1,8 +1,12 @@
 import uuid
 from django.db import models
+from rest_framework.exceptions import ValidationError
 from users.models import User, Dentist
 from treatment.models import Treatment
-from payment.models import Wallet
+from datetime import datetime, time, timedelta
+from django.utils import timezone
+
+
 import decimal
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -27,21 +31,33 @@ class PendingConsultation(models.Model):
     id = models.AutoField(primary_key=True)
     dentist_id = models.ForeignKey(Dentist, on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    duration = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
+        from payment.models import Wallet
+        print("id",self.id)
         user = self.user_id
-        wallet = Wallet.objects.filter(id=user_id).first()
-        dentist = Dentist.objects.filter(id=dentist_id)
+        wallet = Wallet.objects.filter(id=user).first()
+        dentist = Dentist.objects.filter(id=self.dentist_id.id).first()
+    
         if dentist and dentist.consultation_availabilty:
-            price = wallet.balance - dentist.consultation_availabilty
+            price = wallet.balance - dentist.consultation_availabilty * self.duration
             zero = decimal.Decimal(0)
-            if c.compare(zero) == 1:
+            print(price)
+            print(price.compare(zero))
+            if price.compare(zero) == 1:
+                print("saving...")
                 return super().save()
             else:
-                return ValueError("Low Balance")
+                print("low balance")
+                raise ValidationError("Low Balance")
         else:
-            raise ValueError("Dentist Not Available")
+            print("dentist not available")
+            raise ValidationError("Dentist Not Available")
+        
+        
+
 
 
 class Consultation(models.Model):
@@ -51,27 +67,38 @@ class Consultation(models.Model):
     CONSULTATION_STATUS_CHOICE = [
         (CONSULTATION_STATUS_OPEN, 'open'), (CONSULTATION_STATUS_CLOSE, 'close')]
 
-    id = models.UUIDField(primary_key=True, null=False,
-                          default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+         primary_key = True,
+         default = uuid.uuid4,
+         editable = False)
+         
     dentist_id = models.ForeignKey(Dentist, on_delete=models.CASCADE)
+    duration = models.PositiveIntegerField()
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, default=CONSULTATION_STATUS_OPEN)
-    starting_time = models.DateTimeField(auto_now_add=True)
+    starting_time = models.DateTimeField(blank=True)
     ending_time = models.DateTimeField(blank=True)
 
     def save(self, *args, **kwargs):
+        from payment.models import Wallet
         user = self.user_id
-        wallet = Wallet.objects.filter(id=user.id).first()
-        treatment = self.treatment_id
-        c = wallet.balance - treatment.price
+        # self.user_id = self.user_id.id
+        print("user",self.id)
+        print(type(user))
+        wallet = Wallet.objects.filter(id=user).first()
+        print(wallet)
+        dentist = Dentist.objects.filter(id=self.dentist_id.id.id).first()
+        print(dentist)
         zero = decimal.Decimal(0)
-        r = c.compare(zero)
+        price = wallet.balance - dentist.consultation_availabilty * self.duration
+        price.compare(zero)
 
-        if c.compare(zero) == 1:
-            wallet.balance = c
+        if price.compare(zero) == 1:
+            wallet.balance = price
             wallet.save()
-            r = wallet.balance
-
+            self.starting_time = timezone.now()
+            self.ending_time = self.starting_time + timedelta(hours=self.duration)
+            print(self)
             return super().save()
         else:
             raise ValueError("Low Balance")

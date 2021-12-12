@@ -7,8 +7,10 @@ from rest_framework import serializers, status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
+
+from users.models import Dentist, User
 from .models import Consultation, ConsultationMessage, PendingConsultation
-from .serializer import PendingConsultationSerializer, ConsultationMessageSerializer
+from .serializer import ConsultationSerializer, PendingConsultationSerializer, ConsultationMessageSerializer
 
 # Create your views here.
 
@@ -23,18 +25,19 @@ def consultation_chat(request, consultation_chat_id):
     })
 
 
-def PendingConsultationView(APIView):
+class PendingConsultationView(APIView):
     def post(self, request):
         try:
-            serializer = PendingConsultationSerializer(request.data)
+            serializer = PendingConsultationSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-
+            print("serializer is valid")
             serializer.save()
+            print("serializer saved")
             return Response(serializer.data)
         except ValueError as e:
-            if e.message == "Low Balance":
+            if e.msg == "Low Balance":
                 return Response({"message": "Low Balance"}, status=status.HTTP_400_BAD_REQUEST)
-            elif e.message == "Dentist Not Available":
+            elif e.msg == "Dentist Not Available":
                 return Response({"message": "Invalid Availability"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({"message": "Unknown Error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -73,14 +76,28 @@ class ApproveConsultationView(APIView):
 
         try:
             with transaction.atomic():
+                print("pending_is",pending_id)
                 consultation = Consultation()
-                consultation.dentist_id = pending_consultation.dentist_id
-                consultation.user_id = pending_consultation.user_id
+                print(pending_consultation.dentist_id,pending_consultation.user_id)
+                # dentist = Dentist.objects.filter(id= pending_consultation.dentist_id).first()
+                # print(dentist.id.id)
+                print("dentist",pending_consultation.dentist_id.id.id)
+                dentist = Dentist.objects.filter(id=pending_consultation.dentist_id.id.id).first()
+                consultation.dentist_id =dentist
+                print("user..")
+                user = User.objects.filter(id=pending_consultation.user_id.id).first()
+                consultation.user_id = user
+                print("UU")
                 consultation.status = 'o'
+                consultation.duration = pending_consultation.duration
 
+                serializer = ConsultationSerializer(consultation)
+                print("ere plzz sera")
+                consultation.save()
+                print("saved?")
                 pending_consultation.delete()
-                serializer = ConsultationSerialier(consultation)
 
                 return Response(serializer.data)
-        except:
-            return Response({"message": "Invalid Action"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print("excption ",e)
+            return Response({"message": "Invalid Exception"}, status=status.HTTP_400_BAD_REQUEST)
